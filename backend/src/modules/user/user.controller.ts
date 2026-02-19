@@ -97,7 +97,12 @@ export async function createUser(req: Request, res: Response) {
 
 
 export async function signup(req: Request, res: Response) {
-  const { username, password } = req.body as SignupInput;
+  const { username, password, role } = req.body as SignupInput;
+  const desiredRole = role ?? "student";
+
+  if (desiredRole === "admin") {
+    return res.status(403).json({ message: "Admin signup is not allowed" });
+  }
 
   const hashed = await bcrypt.hash(password, 10);
   const user = await findUserByUsername(username);
@@ -106,7 +111,7 @@ export async function signup(req: Request, res: Response) {
     const created = await createPreUser({
       username,
       given_name: username,
-      role: "student",
+      role: desiredRole,
     });
     await updateUserPassword(created.id, hashed);
     return res.status(201).json({ message: "Signup completed" });

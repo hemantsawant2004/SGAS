@@ -20,6 +20,7 @@ export const SignupDto = z.object({
   body: z.object({
     username: usernameSchema,
     password: passwordSchema,
+    role: roleSchema.optional(),
   }),
 });
 

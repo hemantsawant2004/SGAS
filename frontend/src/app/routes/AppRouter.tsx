@@ -10,6 +10,7 @@ import ProtectedRoutesAdmin from './guards/ProtectedRouteAdmin';
 import AdminDashboard from '../../features/admin/AdminDashboard';
 import GuideDashboard from '../../features/guide/GuideDashboard';
 import StudentDashboard from '../../features/student/StudentDashboard';
+import NotFound from '../../features/NotFound';
 
 
 
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       children: [
         { path: '/', element: <Login /> },
         { path: '/signup', element: <Signup /> },
+        { path: "*", element: <NotFound/> }
       ]
     }]
 
@@ -35,8 +37,8 @@ const router = createBrowserRouter([
           { path: "/dashboard", element: <DashboardResolver /> },
           {path:"/admin/dashboard", element:<AdminDashboard/>},
           {path:"/guide/dashboard", element:<GuideDashboard/>},
-          {path:"/student/dashboard", element:<StudentDashboard/>}
-        
+          {path:"/student/dashboard", element:<StudentDashboard/>},
+          { path: "*", element: <NotFound /> },
         ],
       }
     ]

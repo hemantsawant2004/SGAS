@@ -80,7 +80,7 @@ function Login() {
             type="submit"
             disabled={isSubmitting || login.isPending}
             className="w-full py-3 rounded-lg 
-                       bg-[#3E6FB1] hover:bg-purple-600
+                       bg-[#7468F0] hover:bg-purple-600
                        text-white transition duration-300"
           >
             {login.isPending ? "Signing in..." : "Login"}

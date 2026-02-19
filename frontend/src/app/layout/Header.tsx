@@ -86,15 +86,15 @@ function Header({
 </button>
 
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600 text-sm font-semibold text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#7468F0] text-sm font-semibold text-white shadow-sm">
               
             </div>
             <div className="leading-tight">
               <p className="text-base font-semibold tracking-tight">
-                SGAS 
+                Guide Allocation System
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-               {user?.departmentName}  {user?.role}
+               {user?.role}
               </p>
             </div>
           </div>

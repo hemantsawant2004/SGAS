@@ -47,6 +47,22 @@ function Signup() {
             )}
           </div>
 
+          <div>
+            <label className="text-sm text-gray-300">Role</label>
+            <select
+              {...register("role")}
+              className="mt-2 w-full bg-[#0f172a] text-white  border-b border-gray-600
+                         text-white px-1 py-2 focus:outline-none focus:border-purple-500"
+              defaultValue="student"
+            >
+              <option value="student" className="text-white">Student</option>
+              <option value="guide" className="text-white">Guide</option>
+            </select>
+            {errors.role && (
+              <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>
+            )}
+          </div>
+
           {/* Password */}
           <div className="relative">
             <label className="text-sm text-gray-300">Password</label>
@@ -97,7 +113,7 @@ function Signup() {
             type="submit"
             disabled={isSubmitting || signup.isPending}
             className="w-full py-3 rounded-lg 
-                       bg-[#3E6FB1] hover:bg-purple-600
+                       bg-[#7468F0] hover:bg-purple-600
                        text-white transition duration-300"
           >
             {signup.isPending ? "Creating account..." : "Sign Up"}

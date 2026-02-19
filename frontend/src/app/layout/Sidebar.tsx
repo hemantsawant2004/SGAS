@@ -25,7 +25,7 @@ function Sidebar({
       <aside
         className={`hidden md:flex flex-col 
                border-r 
-               bg-[#3E6FB1]
+               bg-slate-800
                py-4 shadow-sm
                transition-all duration-300 overflow-hidden
               ${sidebarOpen ? "w-64" : "w-16"}`}
@@ -35,7 +35,7 @@ function Sidebar({
               MAIN MENU
             </p> */}
 
-          { userRole == "admin" ? (
+          {userRole == "admin" ? (
             <ul className="space-y-1.5">
               {navItemAdmin.map((item) => {
                 const Icon = item.icon;
@@ -46,19 +46,21 @@ function Sidebar({
                       end={item.to === "/app"}
                       className={({ isActive }) =>
                         [
-                          "group flex items-center gap-3 rounded-md px-3 py-2",
-                          "text-slate-300 hover:bg-gray-400 hover:text-white",
+                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
+                          " hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
-                          isActive ? "bg-blue-600 text-white" : "",
+                          isActive ? " text-white" : "",
                         ].join(" ")
                       }
                     >
                       <span
                         className="flex h-7 w-7 items-center justify-center rounded-md 
-                            bg-slate-800 text-slate-400
-                            group-hover:bg-black group-hover:text-white"
+                            text-slate-400
+                            group-hover: group-hover:text-white"
                       >
-                        <Icon className="h-4 w-4" />
+                        <div className="bg-transparent">
+                          <Icon className="h-4 w-4 text-white" />
+                        </div>
                       </span>
                       <span
                         className={`font-medium whitespace-nowrap transition-all duration-300
@@ -71,11 +73,11 @@ function Sidebar({
                 );
               })}
             </ul>
-          ) : (  
+          ) : (
             ""
           )}
 
-            { userRole == "guide" ? (
+          {userRole == "guide" ? (
             <ul className="space-y-1.5">
               {navIteGuide.map((item) => {
                 const Icon = item.icon;
@@ -86,19 +88,21 @@ function Sidebar({
                       end={item.to === "/app"}
                       className={({ isActive }) =>
                         [
-                          "group flex items-center gap-3 rounded-md px-3 py-2",
-                          "text-slate-300 hover:bg-gray-400 hover:text-white",
+                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
+                          "  hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
-                          isActive ? "bg-blue-600 text-white" : "",
+                          isActive ? "text-white" : "",
                         ].join(" ")
                       }
                     >
                       <span
                         className="flex h-7 w-7 items-center justify-center rounded-md 
-                            bg-slate-800 text-slate-400
-                            group-hover:bg-black group-hover:text-white"
+                             text-slate-400
+                            group-hover: group-hover:text-white"
                       >
-                        <Icon className="h-4 w-4" />
+                        <div className="bg-transparent">
+                          <Icon className="h-4 w-4 text-white" />
+                        </div>
                       </span>
                       <span
                         className={`font-medium whitespace-nowrap transition-all duration-300
@@ -111,11 +115,11 @@ function Sidebar({
                 );
               })}
             </ul>
-          ) : (  
+          ) : (
             ""
           )}
 
-            { userRole == "student" ? (
+          {userRole == "student" ? (
             <ul className="space-y-1.5">
               {navStudent.map((item) => {
                 const Icon = item.icon;
@@ -126,19 +130,21 @@ function Sidebar({
                       end={item.to === "/app"}
                       className={({ isActive }) =>
                         [
-                          "group flex items-center gap-3 rounded-md px-3 py-2",
-                          "text-slate-300 hover:bg-gray-400 hover:text-white",
+                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
+                          "  hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
-                          isActive ? "bg-blue-600 text-white" : "",
+                          isActive ? " text-white" : "",
                         ].join(" ")
                       }
                     >
                       <span
                         className="flex h-7 w-7 items-center justify-center rounded-md 
-                            bg-slate-800 text-slate-400
-                            group-hover:bg-black group-hover:text-white"
+                             text-slate-400
+                            group-hover: group-hover:text-white"
                       >
-                        <Icon className="h-4 w-4" />
+                        <div className="bg-transparent">
+                          <Icon className="h-4 w-4 text-white" />
+                        </div>
                       </span>
                       <span
                         className={`font-medium whitespace-nowrap transition-all duration-300
@@ -151,7 +157,7 @@ function Sidebar({
                 );
               })}
             </ul>
-          ) : (  
+          ) : (
             ""
           )}
         </nav>

@@ -20,6 +20,7 @@ exports.SignupDto = zod_1.z.object({
     body: zod_1.z.object({
         username: schemas_1.usernameSchema,
         password: schemas_1.passwordSchema,
+        role: schemas_1.roleSchema.optional(),
     }),
 });
 exports.LoginDto = zod_1.z.object({

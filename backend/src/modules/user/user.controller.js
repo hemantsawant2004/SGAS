@@ -76,14 +76,18 @@ async function createUser(req, res) {
     });
 }
 async function signup(req, res) {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
+    const desiredRole = role ?? "student";
+    if (desiredRole === "admin") {
+        return res.status(403).json({ message: "Admin signup is not allowed" });
+    }
     const hashed = await bcryptjs_1.default.hash(password, 10);
     const user = await (0, user_service_1.findUserByUsername)(username);
     if (!user) {
         const created = await (0, user_service_1.createPreUser)({
             username,
             given_name: username,
-            role: "student",
+            role: desiredRole,
         });
         await (0, user_service_1.updateUserPassword)(created.id, hashed);
         return res.status(201).json({ message: "Signup completed" });
