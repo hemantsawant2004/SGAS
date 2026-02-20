@@ -34,6 +34,6 @@ export const navIteGuide = [
 export const navStudent = [
   { label: "Dashboard", to: "/student/dashboard", icon: FiHome },
   { label: "Submit Project", to: "/student/submitproject", icon: FiFolderPlus },
-  { label: "Track Project Progress", to: "/student/trackprojectprogress", icon: FiTrendingUp },
   { label: "Submit Progress", to: "/student/submitprogress", icon: FiFileText },
+  { label: "Track Project Progress", to: "/student/trackprojectprogress", icon: FiTrendingUp },
 ];

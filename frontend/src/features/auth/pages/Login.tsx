@@ -104,9 +104,9 @@ function Login() {
       {/* RIGHT SIDE - WELCOME SECTION */}
       <div className="w-1/2 bg-white 
                       flex flex-col items-center justify-center text-black p-10">
-        <div className="max-w-md space-y-4">
-          <h2 className="text-3xl font-bold">
-            Welcome to <br /> Project Guide Allocation Portal
+        <div className="max-w-md space-y-4 font-mono">
+          <h2 className="text-3xl font-bold font-mono">
+            Welcome to, <br /> Project Guide Allocation Portal
           </h2>
           <p className="text-slate-800">
             Login to access your account
@@ -115,9 +115,9 @@ function Login() {
 
         {/* Illustration Image */}
         <img
-          src="/student-illustration.jpg"
+          src="/img2.jpg"
           alt="Student Illustration"
-          className="relative  mt-10 w-[400px] mix-blend-multiply dark:brightness-200"
+          className="relative  mt-5 w-[600px] h-[400px]  mix-blend-multiply dark:brightness-200"
         />
       </div>
 

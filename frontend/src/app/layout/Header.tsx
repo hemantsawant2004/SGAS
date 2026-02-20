@@ -8,42 +8,44 @@ import { logout } from '../../features/auth/authSlice';
 interface HeaderProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  userMenuOpen:boolean
-  setUserMenuOpen:React.Dispatch<React.SetStateAction<boolean>>;
-  initial:string
-  username:string
-   sidebarOpen: boolean;
+  userMenuOpen: boolean
+  setUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  initial: string
+  username: string
+  sidebarOpen: boolean;
+  userRole: string;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function Header({
-    mobileMenuOpen,
-    setMobileMenuOpen,
-    userMenuOpen,
-    setUserMenuOpen,
-    initial,
-    username,
-    sidebarOpen,
-    setSidebarOpen
-}:HeaderProps) {
-     const theme = useAppSelector((s) => s.theme.mode);
-       const userMenuRef = useRef<HTMLDivElement | null>(null);
-     const user = useAppSelector((s) => s.auth.user);
+  mobileMenuOpen,
+  setMobileMenuOpen,
+  userMenuOpen,
+  setUserMenuOpen,
+  initial,
+  username,
+  sidebarOpen,
+  userRole,
+  setSidebarOpen
+}: HeaderProps) {
+  const theme = useAppSelector((s) => s.theme.mode);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const user = useAppSelector((s) => s.auth.user);
 
-     const handleLogout = async() => {
-        try{
-          console.log("inside handle logout")
-    await logoutApi()
-    
-        }
-        catch(e){
-          console.log("error to logout")
-        }
-        dispatch(logout());
-        navigate("/", { replace: true });
-      };
-       const dispatch = useAppDispatch();
-        const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      console.log("inside handle logout")
+      await logoutApi()
+
+    }
+    catch (e) {
+      console.log("error to logout")
+    }
+    dispatch(logout());
+    navigate("/", { replace: true });
+  };
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -67,34 +69,34 @@ function Header({
           </button>
 
           <button
-  type="button"
-  onClick={() => setSidebarOpen(o => !o)}
-  className="hidden md:inline-flex items-center justify-center rounded-md p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
->
-  <svg
-    className="h-5 w-5"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-  >
-    {sidebarOpen ? (
-      <path d="M15 19l-7-7 7-7" strokeWidth="2" />
-    ) : (
-      <path d="M9 5l7 7-7 7" strokeWidth="2" />
-    )}
-  </svg>
-</button>
+            type="button"
+            onClick={() => setSidebarOpen(o => !o)}
+            className="hidden md:inline-flex items-center justify-center rounded-md p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              {sidebarOpen ? (
+                <path d="M15 19l-7-7 7-7" strokeWidth="2" />
+              ) : (
+                <path d="M9 5l7 7-7 7" strokeWidth="2" />
+              )}
+            </svg>
+          </button>
 
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#7468F0] text-sm font-semibold text-white shadow-sm">
-              
+
             </div>
             <div className="leading-tight">
               <p className="text-base font-semibold tracking-tight">
                 Guide Allocation System
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-               {user?.role}
+                {user?.role}
               </p>
             </div>
           </div>
@@ -159,12 +161,15 @@ function Header({
 
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white text-sm shadow-lg dark:border-slate-700 dark:bg-slate-800">
-                <button
-                  type="button"
-                  className="block w-full px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-700"
-                >
-                  My Profile
-                </button>
+
+                {user?.role !== "admin" && (
+                  <button
+                    type="button"
+                    className="block w-full px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-700"
+                  >
+                    My Profile
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -177,6 +182,9 @@ function Header({
           </div>
         </div>
       </header>
+
+
+
     </>
   )
 }

@@ -149,7 +149,7 @@ function Signup() {
                         top-1/2 right-20 blur-xl animate-floatSlow" />
 
         {/* Content */}
-        <div className="relative z-10 max-w-md text-black  space-y-4">
+        <div className="relative z-10 max-w-md text-black  space-y-4 font-mono">
           <h2 className="text-3xl font-bold">
             Join the <br /> Project Guide Allocation Portal
           </h2>
@@ -159,9 +159,9 @@ function Signup() {
         </div>
 
         <img
-          src="/student-illustration.jpg"
+          src="/img2.jpg"
           alt="Student Illustration"
-          className="relative z-10 mt-10 w-[400px]"
+          className="relative z-10 mt-10 w-[600px] h-[400px]"
         />
       </div>
     </div>

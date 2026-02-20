@@ -14,10 +14,8 @@ interface SidebarProps {
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 function Sidebar({
-  userDept,
   userRole,
   sidebarOpen,
-  userSubDept,
 }: SidebarProps) {
   return (
     <>
@@ -47,7 +45,7 @@ function Sidebar({
                       className={({ isActive }) =>
                         [
                           " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          " hover:text-slate-800",
+                          // " hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
                           isActive ? " text-white" : "",
                         ].join(" ")
@@ -89,7 +87,7 @@ function Sidebar({
                       className={({ isActive }) =>
                         [
                           " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          "  hover:text-slate-800",
+                          // "  hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
                           isActive ? "text-white" : "",
                         ].join(" ")
@@ -131,7 +129,7 @@ function Sidebar({
                       className={({ isActive }) =>
                         [
                           " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          "  hover:text-slate-800",
+                          // "  hover:text-slate-800",
                           "border border-transparent transition-colors duration-200",
                           isActive ? " text-white" : "",
                         ].join(" ")
