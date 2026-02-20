@@ -8,7 +8,6 @@ export default function UserDropdown() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
-
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 

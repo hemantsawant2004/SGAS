@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { givenNameSchema,passwordSchema,roleSchema, usernameSchema } from "../../schemas";
-// import {
 
-//   givenNameSchema,
-//   passwordSchema,
-//   roleSchema,
-//   usernameSchema,
-// } from "../../schemas";
 
 export const CreateUserDto = z.object({
   body: z.object({

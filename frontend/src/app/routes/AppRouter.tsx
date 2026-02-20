@@ -4,7 +4,6 @@ import ProtectedRoute from './guards/ProtectedRoute';
 import Login from '../../features/auth/pages/Login';
 import Signup from '../../features/auth/pages/Signup';
 import GuestRoute from './guards/GuestRoutes';
-import PublicLayout from '../layout/PublicLayout';
 import DashboardResolver from './resolvers/DashboardResolver';
 import ProtectedRoutesAdmin from './guards/ProtectedRouteAdmin';
 import AdminDashboard from '../../features/admin/AdminDashboard';
@@ -27,6 +26,7 @@ const router = createBrowserRouter([
     }]
 
   },
+
 
   {
     element: <ProtectedRoute />,

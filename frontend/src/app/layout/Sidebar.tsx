@@ -62,7 +62,7 @@ function Sidebar({
                       </span>
                       <span
                         className={`font-medium whitespace-nowrap transition-all duration-300
-  ${sidebarOpen ? "opacity-100 ml-0" : "opacity-0 ml-[-20px]"}`}
+                        ${sidebarOpen ? "opacity-100 ml-0" : "opacity-0 ml-[-20px]"}`}
                       >
                         {item.label}
                       </span>

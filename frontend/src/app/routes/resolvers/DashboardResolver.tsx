@@ -11,7 +11,6 @@ export default function DashboardResolver() {
   const role = user.role?.toLowerCase();
   switch (role) {
     case "admin":
-    case "admin":
       return <Navigate to="/admin/dashboard" replace />;
     case "guide":
       return <Navigate to="/guide/dashboard" replace />;

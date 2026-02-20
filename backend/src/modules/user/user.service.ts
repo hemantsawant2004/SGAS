@@ -29,9 +29,11 @@ export async function updateRefreshToken(
 }
 
 /**
+ * 
  * Create pre-registered user (without password)
  * Roles allowed: admin | guide | student
  */
+
 export async function createPreUser(data: CreateUserInput) {
   return User.create({
     ...data,

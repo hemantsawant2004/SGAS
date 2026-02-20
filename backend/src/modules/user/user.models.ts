@@ -46,6 +46,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    
     refresh_token_expires_at: {
       type: DataTypes.DATE,
       allowNull: true,

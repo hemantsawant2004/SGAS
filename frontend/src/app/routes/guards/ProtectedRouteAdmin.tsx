@@ -3,7 +3,7 @@ import { Navigate,Outlet,useLocation } from "react-router-dom";
 import { useAppSelector } from "../../hooks";
 
 export default function ProtectedRoutesAdmin() {
-   const { user, status } = useAppSelector(s => s.auth);
+  const { user, status } = useAppSelector(s => s.auth);
   const loc = useLocation();
   if (user && !["admin", "superadmin"].includes(user.role)) return null;
   if (status === "checking" || status === "idle") {

@@ -111,8 +111,8 @@ function Login() {
           <p className="text-slate-800">
             Login to access your account
           </p>
-        </div>
-
+        </div> 
+ 
         {/* Illustration Image */}
         <img
           src="/img2.jpg"

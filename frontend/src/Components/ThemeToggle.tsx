@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-// import { toggleMode } from '../features/theme/themeSlice';
 import { toggleMode } from '../features/theme/themeSlice';
 import { Moon, Sun } from "lucide-react";
 

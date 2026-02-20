@@ -2,18 +2,8 @@ import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import crypto from "crypto";
-import {
-  createPreUser,
-  findUserById,
-  findUserByUsername,
-  updateUserPassword,
-  updateRefreshToken,
-} from "./user.service";
-import type {
-  CreateUserInput,
-  LoginInput,
-  SignupInput,
-} from "./user.dto";
+import {createPreUser,findUserById,findUserByUsername,updateUserPassword,updateRefreshToken} from "./user.service";
+import type {CreateUserInput,LoginInput,SignupInput} from "./user.dto";
 
 const jwtSecret: Secret = process.env.JWT_SECRET || "change-me";
 const refreshSecret: Secret =
@@ -39,9 +29,7 @@ function ttlToMs(ttl: SignOptions["expiresIn"]) {
       return value * 1000;
   }
 }
-// function test(){
-//   console.log("test")
-// }
+
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }

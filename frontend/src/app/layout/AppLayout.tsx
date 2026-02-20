@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Outlet} from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
@@ -8,9 +8,9 @@ import { useAppSelector } from "../hooks";
 
 
 export default function AppLayout() {
- 
+
   const user = useAppSelector((s) => s.auth.user);
- 
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -39,27 +39,26 @@ export default function AppLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       {/* HEADER */}
-    <Header
-     mobileMenuOpen={mobileMenuOpen}
-  setMobileMenuOpen={setMobileMenuOpen}
-   userMenuOpen={userMenuOpen}
-  setUserMenuOpen={setUserMenuOpen}
-  initial={initials}
-  username={user?.username ||""}
-    sidebarOpen={sidebarOpen}
-  setSidebarOpen={setSidebarOpen}
-    />
+      <Header
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        userMenuOpen={userMenuOpen}
+        setUserMenuOpen={setUserMenuOpen}
+        initial={initials}
+        userRole={user?.role || ""}
+        username={user?.username || ""}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
       {/* MAIN AREA: sidebar + content */}
       <div className="flex flex-1">
         <Sidebar
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
-          userDept={user?.departmentName}
-          userSubDept={user?.subDepartmentName}
           userRole={user?.role}
           sidebarOpen={sidebarOpen}
-  setSidebarOpen={setSidebarOpen}
+          setSidebarOpen={setSidebarOpen}
 
         />
         {/* Content area */}
@@ -73,7 +72,7 @@ export default function AppLayout() {
             </div>
 
             {/* Footer */}
-           <Footer/>
+            <Footer />
           </div>
         </main>
       </div>

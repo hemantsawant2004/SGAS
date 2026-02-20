@@ -1,8 +1,4 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-// import auth from '../features/auth/authSlice';
-// import theme from '../features/theme/themeSlice';
-// import vendorSlice from '../features/admin/Master/VendorMaster/vendorSlice';
-// import franchise from '../features/admin/Master/FranchiseMaster/franchiseSlice';
 import auth from '../features/auth/authSlice';
 import theme from '../features/theme/themeSlice';
 import {

@@ -8,20 +8,18 @@ import { createUser, login, logout, me, refresh, signup } from "./user.controlle
 const authRouter = Router();
 const userRouter = Router();
 
+
+//post
 authRouter.post("/signup", validate(SignupDto), ah(signup));
 authRouter.post("/login", validate(LoginDto), ah(login));
 authRouter.post("/logout", auth(), ah(logout));
-//authRouter.post("/logout", ah(logout));
-
-authRouter.get("/me", auth(), ah(me));
+userRouter.post("/createUser",auth(),checkAdmin,validate(CreateUserDto),ah(createUser));
 authRouter.post("/refresh", ah(refresh));
 
-userRouter.post(
-  "/createUser",
-  auth(),
-  checkAdmin,
-  validate(CreateUserDto),
-  ah(createUser)
-);
+//get
+authRouter.get("/me", auth(), ah(me));
+
+
+
 
 export { authRouter, userRouter };
