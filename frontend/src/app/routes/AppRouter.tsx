@@ -11,6 +11,7 @@ import GuideDashboard from '../../features/guide/GuideDashboard';
 import StudentDashboard from '../../features/student/StudentDashboard';
 import NotFound from '../../features/NotFound';
 import ForgotPassword from '../../features/auth/pages/ForgotPassword';
+import Guide from '../../features/guide/pages/Guide';
 
 
 
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
           {path:"/admin/dashboard", element:<AdminDashboard/>},
           {path:"/guide/dashboard", element:<GuideDashboard/>},
           {path:"/student/dashboard", element:<StudentDashboard/>},
+          {path:"/guide/createprofile", element:<Guide/>},
           { path: "*", element: <NotFound /> },
         ],
       }

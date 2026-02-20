@@ -74,7 +74,7 @@ function Login() {
                 {errors.password.message}
               </p>
             )}
-            <Link className="text-white text-sm" to="/forgot-password">Forgot Password?</Link>
+            <Link className="text-white text-xs" to="/forgot-password">Forgot Password?</Link>
             
           </div><br/>
 

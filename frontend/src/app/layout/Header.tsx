@@ -96,7 +96,7 @@ function Header({
                 Guide Allocation System
               </p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {user?.role}
+                You are logged in as a {user?.role}
               </p>
             </div>
           </div>
@@ -162,12 +162,13 @@ function Header({
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white text-sm shadow-lg dark:border-slate-700 dark:bg-slate-800">
 
-                {user?.role !== "admin" && (
+                {user?.role == "guide"  && (
                   <button
                     type="button"
                     className="block w-full px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-700"
+                    onClick={()=>navigate('/guide/createprofile')}
                   >
-                    My Profile
+                  Profile
                   </button>
                 )}
                 <button
