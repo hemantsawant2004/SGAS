@@ -1,5 +1,6 @@
 import { User } from "./user.models";
 import type { CreateUserInput } from "./user.dto";
+import bcrypt from "bcrypt";
 
 export async function findUserByUsername(username: string) {
   console.log("inside find user by username", username);
@@ -47,3 +48,4 @@ export async function updateUserPassword(
 ) {
   return User.update({ password }, { where: { id: userId } });
 }
+

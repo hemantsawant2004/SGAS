@@ -25,3 +25,11 @@ export async function signupApi(payload: SignupRequestType) {
 }
 
 export async function logoutApi() { await api.post('/auth/logout'); }
+
+export const forgotPasswordApi = async (data: {
+  username: string;
+  newPassword: string;
+}) => {
+  const res = await api.post("/auth/forgot-password", data);
+  return res.data;
+};

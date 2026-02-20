@@ -10,6 +10,7 @@ import AdminDashboard from '../../features/admin/AdminDashboard';
 import GuideDashboard from '../../features/guide/GuideDashboard';
 import StudentDashboard from '../../features/student/StudentDashboard';
 import NotFound from '../../features/NotFound';
+import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 
 
 
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       children: [
         { path: '/', element: <Login /> },
         { path: '/signup', element: <Signup /> },
+        {path:'//forgot-password', element:<ForgotPassword/>},
         { path: "*", element: <NotFound/> }
       ]
     }]

@@ -25,6 +25,8 @@ export const LoginDto = z.object({
   }),
 });
 
+
+
 export type CreateUserInput = z.infer<typeof CreateUserDto>["body"];
 export type SignupInput = z.infer<typeof SignupDto>["body"];
 export type LoginInput = z.infer<typeof LoginDto>["body"];

@@ -52,6 +52,8 @@ User.init(
       allowNull: true,
     },
 
+    
+
   },
   {
     sequelize,

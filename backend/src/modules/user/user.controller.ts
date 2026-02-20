@@ -239,3 +239,25 @@ export async function refresh(req: Request, res: Response) {
     return res.status(401).json({ message: "Invalid refresh token" });
   }
 }
+
+
+export async function forgotPassword(req: Request, res: Response) {
+  const { username, newPassword } = req.body;
+
+  if (!username || !newPassword) {
+    return res.status(400).json({ message: "Username and new password required" });
+  }
+
+  const user = await findUserByUsername(username);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  await updateUserPassword(user.id, hashed);
+
+  return res.json({ message: "Password updated successfully" });
+}

@@ -21,6 +21,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'default_secret'));
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 
+
 // Error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Error caught:", err);

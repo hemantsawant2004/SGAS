@@ -20,9 +20,7 @@ export const SignupRequest = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
-
-    
+    path: ["confirmPassword"], 
   });
 
 export type SignupRequestType = z.infer<typeof SignupRequest>;
@@ -36,3 +34,5 @@ export const SessionUser = z.object({
   role:z.string(),
 });
 export type SessionUser = z.infer<typeof SessionUser>;
+
+
