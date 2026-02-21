@@ -40,7 +40,7 @@ const MultiSelectField = ({
             options={options}
             isMulti
             isSearchable
-            className="text-sm"
+            className="text-sm dark:text-black"
             classNamePrefix="react-select"
             placeholder=""
             value={options.filter((option) =>

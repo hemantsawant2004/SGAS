@@ -117,10 +117,10 @@ function Guide() {
   ) => (
     <>
       <BackButton />
-      <div className="min-h-screen  flex items-center justify-center p-6">
+      <div className="min-h-screen  flex items-center justify-center p-6 dark:text-black">
 
-        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="relative bg-gradient-to-r from-slate-700 to-slate-900 h-40 flex items-center px-10">
+        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden dark:border-white">
+          <div className="relative bg-gradient-to-r from-slate-700 to-slate-900 h-40 flex items-center px-10 dark:border-white">
             <div>
               <h1 className="text-2xl font-bold text-white hover:scale-105">
                 {/* {mode === "create" ? "Create Profile" : "Edit Profile"} */}
@@ -154,9 +154,9 @@ function Guide() {
             </div>
           </div>
 
-          <div className="pt-20 px-12 pb-12">
+          <div className="pt-20 px-12 pb-12 dark:bg-slate-800">
             <form onSubmit={handleSubmit(submitHandler)} className="space-y-10">
-              <div className="bg-slate-50 p-6 rounded-2xl shadow-sm">
+              <div className="bg-slate-50 p-6 rounded-2xl shadow-sm ">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6">Personal Details</h2>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -215,7 +215,7 @@ function Guide() {
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-6 rounded-2xl shadow-sm">
+              <div className="bg-slate-50 p-6 rounded-2xl shadow-sm ">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6">Qualification Details</h2>
 
                 <div className="grid md:grid-cols-2 gap-6">
