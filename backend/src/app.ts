@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { authRouter, userRouter } from "./modules/user/user.routes";
 import { env } from './config/env';
+import guideRouter from "./modules/Guide/guide.route";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'default_secret'));
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
+app.use("/api/guides", guideRouter)
 
 
 // Error handler

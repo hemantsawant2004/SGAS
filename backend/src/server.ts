@@ -3,6 +3,7 @@ dotenv.config();
 import app from "./app";
 import { sequelize } from "./config/database";
 // import { applyAssociations } from "./associations";
+import { Guide } from "./modules/Guide/guide.model";
 
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;

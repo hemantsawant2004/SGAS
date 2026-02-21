@@ -1,19 +1,50 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // import { createGuideProfile } from "../services/guideService";
 // import { CreateGuideProfileDto } from "../types/guide.dto";
-import { createGuideProfile } from "../services/guide.service";
+import {
+  createGuideProfile,
+  getMyGuideProfile,
+  updateMyGuideProfile,
+} from "../services/guide.service";
 import type{ CreateGuideProfileDto } from "../dto/guide.dto";
 import { useNavigate } from "react-router-dom";
 
-export const useCreateGuideProfile = () => {
+export const GUIDE_PROFILE_QUERY_KEY = ["guide-profile"];
+export const getGuideProfileQueryKey = (username?: string) => [
+  ...GUIDE_PROFILE_QUERY_KEY,
+  username ?? "anonymous",
+];
+
+export const useCreateGuideProfile = (username?: string) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: CreateGuideProfileDto) =>
       createGuideProfile(data),
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGuideProfileQueryKey(username) });
       navigate("/guide/dashboard");
+    },
+  });
+};
+
+export const useMyGuideProfile = (username?: string) =>
+  useQuery({
+    queryKey: getGuideProfileQueryKey(username),
+    queryFn: getMyGuideProfile,
+    retry: false,
+    enabled: Boolean(username),
+  });
+
+export const useUpdateGuideProfile = (username?: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateGuideProfileDto) => updateMyGuideProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGuideProfileQueryKey(username) });
     },
   });
 };
