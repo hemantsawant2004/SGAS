@@ -26,6 +26,8 @@ const defaultFormValues: CreateGuideProfileDto = {
   expertise: [],
 };
 
+
+
 const languageOptions = [
   { value: "Java", label: "Java" },
   { value: "Python", label: "Python" },
@@ -34,7 +36,9 @@ const languageOptions = [
   { value: "Angular", label: "Angular" },
   { value: "React", label: "React" },
   { value: "MySQL", label: "MySQL" },
+  { value: "Oracle", label: "Oracle" },
   { value: "PHP", label: "PHP" },
+  { value: "R programming", label: "R programming" },
   { value: "HTML", label: "HTML" },
   { value: "Express", label: "Express" },
   { value: "Android", label: "Android" },
@@ -57,10 +61,8 @@ function Guide() {
   } = useForm<CreateGuideProfileDto>({
     defaultValues: defaultFormValues,
   });
-
   const [preview, setPreview] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const user = useAppSelector((s) => s.auth.user);
   const username = user?.username;
   const { mutate: createProfile, isPending: isCreating } = useCreateGuideProfile(username);
@@ -345,7 +347,7 @@ function Guide() {
             {/* LEFT SIDEBAR */}
             <div className="bg-white rounded-3xl shadow-lg p-8 flex flex-col items-center text-center border border-slate-200 dark:border-white dark:bg-slate-800 ">
 
-              <div className="w-32 h-32 rounded-full bg-slate-900 text-white flex items-center justify-center text-4xl font-bold shadow-md dark:text-white">
+              <div className="w-32 h-32 rounded-full bg-slate-900 text-white flex items-center justify-center text-4xl font-bold shadow-md dark:text-white dark:bg-gray-600">
                 {existingProfile.fullName.charAt(0)}
               </div>
 
@@ -371,7 +373,7 @@ function Guide() {
                 <div>
                   <p className="text-xs text-slate-400 uppercase dark:text-white">Experience</p>
                   <p className="font-medium">
-                    {existingProfile.experience} Years
+                    I have Experience of, {existingProfile.experience} Years
                   </p>
                 </div>
               </div>
@@ -420,7 +422,7 @@ function Guide() {
                   {existingProfile.expertise?.map((skill: string, index: number) => (
                     <span
                       key={index}
-                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm hover:bg-slate-900 hover:text-white transition dark:text-white"
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm hover:scale-110 transition dark:text-white"
                     >
                       {skill}
                     </span>

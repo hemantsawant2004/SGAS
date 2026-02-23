@@ -119,7 +119,7 @@ function Login() {
         <img
           src="/img2.jpg"
           alt="Student Illustration"
-          className="relative  mt-5 w-[600px] h-[400px]  mix-blend-multiply dark:brightness-200"
+          className="relative  mt-5 w-[600px] h-[400px]  "
         />
       </div>
 

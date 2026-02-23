@@ -21,143 +21,75 @@ function Sidebar({
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden md:flex flex-col 
-               border-r 
-               bg-slate-800
-               py-4 shadow-sm
-               transition-all duration-300 overflow-hidden
-              ${sidebarOpen ? "w-64" : "w-16"}`}
+        className={`
+    hidden md:flex flex-col
+    bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900
+    border-r border-slate-700/50
+    py-6
+    transition-all duration-300 ease-in-out
+    ${sidebarOpen ? "w-64" : "w-20"}
+  `}
       >
-        <nav className="px-4">
-          {/* <p className="mb-3 px-1 text-[11px] font-semibold tracking-[0.16em] text-slate-500">
-              MAIN MENU
-            </p> */}
+        <nav className="flex-1 px-3 space-y-2">
 
-          {userRole == "admin" ? (
-            <ul className="space-y-1.5">
-              {navItemAdmin.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.to}>
-                    <NavLink
-                      to={item.to}
-                      end={item.to === "/app"}
-                      className={({ isActive }) =>
-                        [
-                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          // " hover:text-slate-800",
-                          "border border-transparent transition-colors duration-200",
-                          isActive ? "text-yellow bg-gray-600" : "",
-                        ].join(" ")
-                      }
-                    >
-                      <span
-                        className="flex h-7 w-7 items-center justify-center rounded-md 
-                            text-slate-400
-                            group-hover: group-hover:text-white"
-                      >
-                        <div className="bg-transparent">
-                          <Icon className="h-4 w-4 text-white" />
-                        </div>
-                      </span>
-                      <span
-                        className={`font-medium whitespace-nowrap transition-all duration-300
-                        ${sidebarOpen ? "opacity-100 ml-0" : "opacity-0 ml-[-20px]"}`}
-                      >
-                        {item.label}
-                      </span>
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            ""
-          )}
+          {(userRole === "admin"
+            ? navItemAdmin
+            : userRole === "guide"
+              ? navIteGuide
+              : userRole === "student"
+                ? navStudent
+                : []
+          ).map((item) => {
+            const Icon = item.icon;
 
-          {userRole == "guide" ? (
-            <ul className="space-y-1.5">
-              {navIteGuide.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.to}>
-                    <NavLink
-                      to={item.to}
-                      end={item.to === "/app"}
-                      className={({ isActive }) =>
-                        [
-                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          // "  hover:text-slate-800",
-                          "border border-transparent transition-colors duration-200",
-                          isActive ? "text-yellow bg-gray-600" : "",
-                        ].join(" ")
-                      }
-                    >
-                      <span
-                        className="flex h-7 w-7 items-center justify-center rounded-md 
-                             text-slate-400
-                            group-hover: group-hover:text-white"
-                      >
-                        <div className="bg-transparent">
-                          <Icon className="h-4 w-4 text-white" />
-                        </div>
-                      </span>
-                      <span
-                        className={`font-medium whitespace-nowrap transition-all duration-300
-  ${sidebarOpen ? "opacity-100 ml-0" : "opacity-0 ml-[-20px]"}`}
-                      >
-                        {item.label}
-                      </span>
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            ""
-          )}
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/app"}
+                className={({ isActive }) =>
+                  `
+            group relative flex items-center gap-4
+            rounded-xl px-3 py-2.5
+            text-sm font-medium
+            transition-all duration-200
+            ${isActive
+                    ? "bg-gray-400 text-white shadow-lg shadow-indigo-500/20"
+                    : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
+                  }
+            `
+                }
+              >
+                {/* Icon */}
+                <div
+                  className={`
+              flex h-9 w-9 items-center justify-center
+              rounded-lg transition-all
+              ${sidebarOpen
+                      ? "bg-slate-700/50"
+                      : "bg-transparent"
+                    }
+              group-hover:bg-indigo-500/20
+            `}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
 
-          {userRole == "student" ? (
-            <ul className="space-y-1.5">
-              {navStudent.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.to}>
-                    <NavLink
-                      to={item.to}
-                      end={item.to === "/app"}
-                      className={({ isActive }) =>
-                        [
-                          " hover:text-sm group flex items-center gap-3 rounded-md px-3 py-2 text-white",
-                          // "  hover:text-slate-800",
-                          "border border-transparent transition-colors duration-200",
-                          isActive ? "text-yellow bg-gray-600" : "",
-                        ].join(" ")
-                      }
-                    >
-                      <span
-                        className="flex h-7 w-7 items-center justify-center rounded-md 
-                             text-slate-400
-                            group-hover: group-hover:text-white"
-                      >
-                        <div className="bg-transparent">
-                          <Icon className="h-4 w-4 text-white" />
-                        </div>
-                      </span>
-                      <span
-                        className={`font-medium whitespace-nowrap transition-all duration-300
-  ${sidebarOpen ? "opacity-100 ml-0" : "opacity-0 ml-[-20px]"}`}
-                      >
-                        {item.label}
-                      </span>
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            ""
-          )}
+                {/* Label */}
+                <span
+                  className={`
+              whitespace-nowrap transition-all duration-300
+              ${sidebarOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"}
+            `}
+                >
+                  {item.label}
+                </span>
+
+                {/* Active Indicator Line */}
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-indigo-500 opacity-0 group-[.active]:opacity-100" />
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
