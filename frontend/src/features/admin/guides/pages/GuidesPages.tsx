@@ -38,7 +38,7 @@ function GuidesPage() {
     <div className="min-h-screen p-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
-        <h4 className="text-3xl font-bold text-gray-800 dark:text-white font-mono">
+        <h4 className="text-4xl font-bold text-gray-800 dark:text-white font-mono">
           Welcome, {user?.username}
         </h4>
 
@@ -141,7 +141,7 @@ function GuidesPage() {
                     onClick={() => reactivateMutate(guide.id)}
                     className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
                   >
-                    Reactivate
+                    Activate
                   </button>
                 )
               )}

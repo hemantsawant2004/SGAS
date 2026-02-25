@@ -37,7 +37,7 @@ export const navIteGuide = [
   { label: "Allocated Projects", to: "/guide/allocatedprojects", icon: FiLayers },
 
   // { label: "Students", to: "/guide/students", icon: FiUsers },
-   { label: "Students", to: "/student/dashboard", icon: FiUsers },
+  //  { label: "Students", to: "/student/dashboard", icon: FiUsers },
 
   { label: "Track Progress", to: "/guide/trackprogress", icon: FiTrendingUp },
 ];
