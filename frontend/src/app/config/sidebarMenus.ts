@@ -20,7 +20,7 @@ export const navItemAdmin = [
   { label: "Dashboard", to: "/admin/dashboard", icon: FiHome },
 
   // { label: "Guides", to: "/admin/guides", icon: FiUser },
-  { label: "Guides", to: "/guide/dashboard", icon: FiUser },
+  { label: "Guides", to: "/admin-guides", icon: FiUser },
 
   // { label: "Students", to: "/admin/students", icon: FiUsers },
   { label: "Students", to: "/student/dashboard", icon: FiUsers },

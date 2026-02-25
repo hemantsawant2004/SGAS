@@ -5,7 +5,7 @@ import { useAppSelector } from "../../hooks";
 export default function ProtectedRoutesAdmin() {
   const { user, status } = useAppSelector(s => s.auth);
   const loc = useLocation();
-  if (user && !["admin", "superadmin"].includes(user.role)) return null;
+  if (user && !["admin"].includes(user.role)) return null;
   if (status === "checking" || status === "idle") {
     // same loader as before if you want
     return (
@@ -18,7 +18,7 @@ export default function ProtectedRoutesAdmin() {
   if (!user) return <Navigate to="/" replace state={{ from: loc }} />;
 
     // logged in but not admin or superadmin
-  if (!["admin", "superadmin"].includes(user.role)) {
+  if (!["admin"].includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 

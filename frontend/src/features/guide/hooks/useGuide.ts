@@ -36,6 +36,7 @@ export const useMyGuideProfile = (username?: string) =>
     queryFn: getMyGuideProfile,
     retry: false,
     enabled: Boolean(username),
+    // staleTime: 1000 * 60 * 5,
   });
 
 export const useUpdateGuideProfile = (username?: string) => {

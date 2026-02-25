@@ -12,6 +12,7 @@ import StudentDashboard from '../../features/student/StudentDashboard';
 import NotFound from '../../features/NotFound';
 import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 import Guide from '../../features/guide/pages/Guide';
+import GuidesPage from '../../features/admin/guides/pages/GuidesPages';
 
 
 
@@ -58,7 +59,10 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/dashboard", element: <DashboardResolver /> },
+          { path: "/admin-guides", element: <GuidesPage /> },
+
          //{ path: "/ho/admin/dashboard", element: <AdminDashboard /> },
+
         ],
       }
     ]
