@@ -16,6 +16,8 @@ function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"student" | "guide">("student");
+  const roleField = register("role");
 
   return (
     <div className="min-h-screen flex">
@@ -24,13 +26,14 @@ function Signup() {
       <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-[350px] space-y-6"
+          className="w-[500px] space-y-6"
         >
           <div>
             <h1 className="text-3xl font-semibold text-white">Sign Up</h1>
-         
+
           </div>
 
+      <div className="gap-6">
           {/* Username */}
           <div>
             <label className="text-sm text-gray-300">Username</label>
@@ -47,10 +50,17 @@ function Signup() {
             )}
           </div>
 
+          {/* role */}
           <div>
             <label className="text-sm text-gray-300">Role</label>
             <select
-              {...register("role")}
+              name={roleField.name}
+              ref={roleField.ref}
+              onBlur={roleField.onBlur}
+              onChange={(e) => {
+                roleField.onChange(e);
+                setSelectedRole(e.target.value as "student" | "guide");
+              }}
               className="mt-2 w-full bg-[#0f172a] text-white  border-b border-gray-600
                          text-white px-1 py-2 focus:outline-none focus:border-purple-500"
               defaultValue="student"
@@ -62,6 +72,62 @@ function Signup() {
               <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>
             )}
           </div>
+      </div>
+
+          {selectedRole === "student" && (
+            <>
+              <div className="flex gap-6">
+                {/* class */}
+                <div>
+                  <label className="text-sm text-gray-300">Class</label>
+                  <input
+                    {...register("class")}
+                    placeholder="Enter your class"
+                    className="mt-2 w-full bg-transparent border-b border-gray-600
+                         text-white px-1 py-2 focus:outline-none focus:border-purple-500"
+                  />
+                  {errors.class && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.class.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* division */}
+                <div>
+                  <label className="text-sm text-gray-300">Division</label>
+                  <input
+                    {...register("division")}
+                    placeholder="Enter your division"
+                    className="mt-2 w-full bg-transparent border-b border-gray-600
+                         text-white px-1 py-2 focus:outline-none focus:border-purple-500"
+                  />
+                  {errors.division && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.division.message}
+                    </p>
+                  )}
+                </div>
+
+              </div>
+
+              {/* roll number */}
+              <div>
+                <label className="text-sm text-gray-300">Roll Number</label>
+                <input
+                  {...register("rollNumber")}
+                  placeholder="Enter your Roll Number"
+                  className="mt-2 w-full bg-transparent border-b border-gray-600
+                         text-white px-1 py-2 focus:outline-none focus:border-purple-500"
+                />
+                {errors.rollNumber && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.rollNumber.message}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Password */}
           <div className="relative">
@@ -107,7 +173,8 @@ function Signup() {
                 {errors.confirmPassword.message}
               </p>
             )}
-          </div><br/>
+          </div>
+
 
           <button
             type="submit"

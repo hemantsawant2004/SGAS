@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getAllGuides } from "./guide.service";
+import { deleteGuides, getAllGuides } from "./guide.service";
 import { softDeleteGuide } from "./guide.service";
 import { reactivateGuide } from "./guide.service";
 
@@ -12,16 +12,19 @@ export const getGuides = async (req: Request, res: Response) => {
   });
 };
 
-// export const removeGuide = async(req:Request, res:Response)=>{
-//   const id =  Number(req.params.id);
+//delete guide
+export const removeGuide = async(req:Request, res:Response)=>{
+  const id =  Number(req.params.id);
 
-//   const result = await deleteGuide(id);
+  const result = await deleteGuides (id);
 
-//   res.sendStatus(200).json({
-//     success:true,
-//     message:result.message,
-//   });
-// };
+  res.sendStatus(200).json({
+    success:true,
+    message:result.message,
+  });
+};
+
+
 export const deactivateGuide = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 

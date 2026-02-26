@@ -30,14 +30,34 @@ export async function updateRefreshToken(
 }
 
 /**
- * 
+ *
  * Create pre-registered user (without password)
  * Roles allowed: admin | guide | student
  */
-
 export async function createPreUser(data: CreateUserInput) {
+  if (data.role === "student") {
+    const existingRollInSameClassDivision = await User.findOne({
+      where: {
+        role: "student",
+        class: data.class,
+        division: data.division,
+        rollNumber: data.rollNumber,
+      },
+      attributes: ["id"],
+    });
+
+    if (existingRollInSameClassDivision) {
+      throw new Error("Roll number already exists in this class and division.");
+    }
+  }
+
   return User.create({
-    ...data,
+    username: data.username,
+    given_name: data.given_name,
+    role: data.role,
+    class: data.role === "student" ? data.class : null,
+    division: data.role === "student" ? data.division : null,
+    rollNumber: data.role === "student" ? data.rollNumber : null,
     password: null,
   });
 }
@@ -48,4 +68,3 @@ export async function updateUserPassword(
 ) {
   return User.update({ password }, { where: { id: userId } });
 }
-

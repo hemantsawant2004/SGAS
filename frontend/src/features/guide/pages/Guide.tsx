@@ -78,6 +78,7 @@ function Guide() {
   const hasProfile = Boolean(existingProfile) && !profileError;
 
   const onCreateSubmit = (data: CreateGuideProfileDto) => {
+    alert(`Welcome to Guide Allocation Portal ${data.fullName}`)
     createProfile({
       ...data,
       experience: Number(data.experience),
@@ -85,6 +86,7 @@ function Guide() {
   };
 
   const onUpdateSubmit = (data: CreateGuideProfileDto) => {
+    alert(`Dear, ${data.fullName} Your Profile is Now Updated`);
     updateProfile(
       {
         ...data,

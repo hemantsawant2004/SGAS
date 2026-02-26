@@ -1,6 +1,7 @@
 import { Guide } from "./guide.model";
 import { CreateGuideDto } from "./guide.dto";
 import { AuthUser } from "../../types/express";
+import { Project } from "../projects/project.model";
 
 export const CreateGuideProfile = async (
   data: CreateGuideDto,
@@ -47,4 +48,15 @@ export const updateGuideProfileByUser = async (
 
   await guide.update({ ...data, userId: user.id, username: user.username });
   return guide;
+};
+
+export const getGuideProjectsService = async (studentId: number) => {
+  return Project.findAll({
+    where: { studentId },
+    include: [
+      { association: "preferredGuide", attributes: ["id", "fullName"] },
+      { association: "members", attributes: ["id", "username"], through: { attributes: [] } },
+    ],
+    order: [["createdAt", "DESC"]],
+  });
 };

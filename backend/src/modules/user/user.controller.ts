@@ -50,12 +50,88 @@ function signRefreshToken(user: { id: number; username: string; role: string }) 
   );
 }
 
+// export async function createUser(req: Request, res: Response) {
+//   const { username, given_name, role,  } =
+//     req.body as CreateUserInput;
+
+//   const desiredRole = role ?? "student";
+
+//   const creatorRole = req.user?.role;
+
+//   if (creatorRole === "admin" && desiredRole === "admin") {
+//     return res
+//       .status(403)
+//       .json({ message: "Admin cannot create another admin" });
+//   }
+
+//   const existing = await findUserByUsername(username);
+//   if (existing) {
+//     return res.status(409).json({ message: "Username already exists" });
+//   }
+
+//   const user = await createPreUser({
+//     username,
+//     given_name,
+//     role: desiredRole,
+//   });
+
+//   return res.status(201).json({
+//     id: user.id,
+//     username: user.username,
+//     given_name: user.given_name,
+//     role: user.role,
+//   });
+// }
+
+
+// export async function signup(req: Request, res: Response) {
+//   const { username, password, role, class: studentClass, division, rollNumber } = req.body as SignupInput;
+//   const desiredRole = role ?? "student";
+
+//   if (desiredRole === "admin") {
+//     return res.status(403).json({ message: "Admin signup is not allowed" });
+//   }
+
+//   if (desiredRole === "student") {
+//   if (!studentClass || !division || !rollNumber) {
+//     return res.status(400).json({
+//       message: "Class, Division and Roll Number are required for students"
+//     });
+//   }
+// }
+
+//   const hashed = await bcrypt.hash(password, 10);
+//   const user = await findUserByUsername(username);
+
+//   if (!user) {
+//     const created = await createPreUser({
+//       username,
+//       given_name: username,
+//       role: desiredRole,
+//     });
+//     await updateUserPassword(created.id, hashed);
+//     return res.status(201).json({ message: "Signup completed" });
+//   }
+
+//   if (user.password) {
+//     return res.status(409).json({ message: "User already registered" });
+//   }
+
+//   await updateUserPassword(user.id, hashed);
+
+//   return res.json({ message: "Signup completed" });
+// }
 export async function createUser(req: Request, res: Response) {
-  const { username, given_name, role } =
-    req.body as CreateUserInput;
+  const {
+    username,
+    given_name,
+    role,
+    class: studentClass,
+    division,
+    rollNumber,
+  } = req.body as CreateUserInput;
 
   const desiredRole = role ?? "student";
-
   const creatorRole = req.user?.role;
 
   if (creatorRole === "admin" && desiredRole === "admin") {
@@ -69,10 +145,21 @@ export async function createUser(req: Request, res: Response) {
     return res.status(409).json({ message: "Username already exists" });
   }
 
+  if (desiredRole === "student") {
+    if (!studentClass || !division || !rollNumber) {
+      return res.status(400).json({
+        message: "Class, Division and Roll Number are required for students",
+      });
+    }
+  }
+
   const user = await createPreUser({
     username,
     given_name,
     role: desiredRole,
+    class: studentClass,
+    division,
+    rollNumber,
   });
 
   return res.status(201).json({
@@ -85,31 +172,54 @@ export async function createUser(req: Request, res: Response) {
 
 
 export async function signup(req: Request, res: Response) {
-  const { username, password, role } = req.body as SignupInput;
+  const {
+    username,
+    password,
+    role,
+    class: studentClass,
+    division,
+    rollNumber,
+  } = req.body as SignupInput;
+
   const desiredRole = role ?? "student";
 
   if (desiredRole === "admin") {
     return res.status(403).json({ message: "Admin signup is not allowed" });
   }
 
-  const hashed = await bcrypt.hash(password, 10);
-  const user = await findUserByUsername(username);
+  // ✅ Require academic details only for students
+  if (desiredRole === "student") {
+    if (!studentClass || !division || !rollNumber) {
+      return res.status(400).json({
+        message: "Class, Division and Roll Number are required for students",
+      });
+    }
+  }
 
-  if (!user) {
+  const hashed = await bcrypt.hash(password, 10);
+
+  const existing = await findUserByUsername(username);
+
+  if (!existing) {
     const created = await createPreUser({
       username,
       given_name: username,
       role: desiredRole,
+      class: studentClass,
+      division,
+      rollNumber,
     });
+
     await updateUserPassword(created.id, hashed);
+
     return res.status(201).json({ message: "Signup completed" });
   }
 
-  if (user.password) {
+  if (existing.password) {
     return res.status(409).json({ message: "User already registered" });
   }
 
-  await updateUserPassword(user.id, hashed);
+  await updateUserPassword(existing.id, hashed);
 
   return res.json({ message: "Signup completed" });
 }

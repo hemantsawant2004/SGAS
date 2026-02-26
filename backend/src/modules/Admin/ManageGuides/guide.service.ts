@@ -53,3 +53,17 @@ export const reactivateGuide = async (id: number) => {
   return { message: "Guide reactivated successfully" };
 };
 
+//delete guide
+export const deleteGuides = async(id:number)=>{
+  const guides=await Guide.findOne({
+    where:{id},
+  });
+
+  if(!guides){
+    throw new Error("guide not found");
+  }
+
+  await guides.destroy();
+  return{message:"guide deleted successfully"};
+};
+

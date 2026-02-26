@@ -9,7 +9,6 @@ export class User extends Model {
   declare role: "admin" | "guide" | "student";
   declare refresh_token_hash: string | null;
   declare refresh_token_expires_at: Date | null;
-
 }
 
 User.init(
@@ -46,17 +45,36 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    
+
     refresh_token_expires_at: {
       type: DataTypes.DATE,
       allowNull: true,
     },
 
-    
+    class: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
 
+    division: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    rollNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize,
     tableName: "users",
+    indexes: [
+      {
+        name: "uq_users_class_division_roll",
+        unique: true,
+        fields: ["class", "division", "rollNumber"],
+      },
+    ],
   }
 );

@@ -7,6 +7,7 @@ import guideRouter from "./modules/Guide/guide.route";
 import AdminGuideRoutes from "./modules/Admin/ManageGuides/guide.route";
 import AdminStudentRoutes from "./modules/Admin/ManageStudents/students.routes";
 import StudentGuideRoutes from "./modules/Student/guides/guides.routes";
+import projectRoutes from "./modules/projects/project.routes";
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.use("/api/users", userRouter);
 app.use("/api/guides", guideRouter)
 app.use("/api/admin-guides", AdminGuideRoutes);
 app.use("/api/admin-students",AdminStudentRoutes);
-app.use("/api/student-guides",StudentGuideRoutes)
+app.use("/api/student-guides",StudentGuideRoutes);
+app.use("/api/projects", projectRoutes);
 
 // Error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
