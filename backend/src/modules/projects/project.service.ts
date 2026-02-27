@@ -28,6 +28,16 @@ export const createProjectService = async (
   }
 
   return sequelize.transaction(async (transaction) => {
+    const preferredGuide = await Guide.findOne({
+      where: { id: payload.preferredGuideId, isActive: true },
+      attributes: ["id"],
+      transaction,
+    });
+
+    if (!preferredGuide) {
+      throw new Error("Selected preferred guide is invalid or inactive.");
+    }
+
     const [existingCreatorProject, existingCreatorAsMember] = await Promise.all([
       Project.findOne({ where: { studentId }, transaction }),
       ProjectMember.findOne({ where: { studentId }, transaction }),

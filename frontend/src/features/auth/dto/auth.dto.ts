@@ -8,7 +8,7 @@ export type LoginRequestType = z.infer<typeof LoginRequest>;
 
 export const SignupRequest = z
   .object({
-    username: z.string().min(3, "Username is required"),
+    username: z.string().min(3, "Username must be more than 3 characters"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["student", "guide"], {
       message: "Role is required",

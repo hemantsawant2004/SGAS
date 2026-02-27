@@ -27,9 +27,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/guides", guideRouter)
 app.use("/api/admin-guides", AdminGuideRoutes);
-app.use("/api/admin-students",AdminStudentRoutes);
-app.use("/api/student-guides",StudentGuideRoutes);
-app.use("/api/projects", projectRoutes);
+app.use("/api/admin-students",AdminStudentRoutes);//all students to adim
+app.use("/api/student-guides",StudentGuideRoutes);//all guides to admin
+app.use("/api/projects", projectRoutes);//create project
 
 // Error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

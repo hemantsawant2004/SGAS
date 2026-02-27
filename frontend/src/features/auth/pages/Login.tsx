@@ -21,10 +21,10 @@ function Login() {
     <div className="min-h-screen flex">
       
       {/* LEFT SIDE - LOGIN */}
-      <div className="w-1/2 bg-[#0f172a] flex items-center justify-center">
+      <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-[350px] space-y-6"
+          className="w-[500px] space-y-6"
         >
           <div>
             <h1 className="text-3xl font-semibold text-white">Login</h1>

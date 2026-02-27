@@ -7,6 +7,6 @@ const AdminGuideRoutes = Router();
 AdminGuideRoutes.get("/", getGuides);
 AdminGuideRoutes.patch("/:id/deactivate", deactivateGuide);
 AdminGuideRoutes.patch("/:id/reactivate", activateGuide)
-AdminGuideRoutes.delete("/:id/",removeGuide);
+AdminGuideRoutes.delete("/:id/delete",removeGuide);
 
 export default AdminGuideRoutes;

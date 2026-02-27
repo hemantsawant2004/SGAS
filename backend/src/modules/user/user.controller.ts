@@ -141,9 +141,9 @@ export async function createUser(req: Request, res: Response) {
   }
 
   const existing = await findUserByUsername(username);
-  if (existing) {
-    return res.status(409).json({ message: "Username already exists" });
-  }
+  // if (existing) {
+  //   return res.status(409).json({ message: "Username already exists" });
+  // }
 
   if (desiredRole === "student") {
     if (!studentClass || !division || !rollNumber) {
@@ -169,7 +169,6 @@ export async function createUser(req: Request, res: Response) {
     role: user.role,
   });
 }
-
 
 export async function signup(req: Request, res: Response) {
   const {
@@ -216,7 +215,7 @@ export async function signup(req: Request, res: Response) {
   }
 
   if (existing.password) {
-    return res.status(409).json({ message: "User already registered" });
+    return res.status(409).json({ message: "The Username you entered is not available" });
   }
 
   await updateUserPassword(existing.id, hashed);
