@@ -14,6 +14,12 @@ Project.belongsTo(Guide, {
   as: "preferredGuide",
 });
 
+Guide.hasMany(Project, { foreignKey: "guideId", as: "assignedProjects" });
+Project.belongsTo(Guide, {
+  foreignKey: "guideId",
+  as: "assignedGuide",
+});
+
 // Many-to-Many
 Project.belongsToMany(User, {
   through: ProjectMember,

@@ -65,12 +65,14 @@ export const getGuideProjectsController = async (
   res: Response
 ) => {
   try {
-    const guideId = (req as any).user.id;
-    const projects = await getGuideProjectsService(guideId);
+    const projects = await getGuideProjectsService(req.user!);
 
     res.json({ success: true, data: projects });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.message?.includes("not found") ? 404 : 500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

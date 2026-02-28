@@ -3,7 +3,10 @@ import { ProjectMember } from "./projectMember.model";
 import { CreateProjectDto } from "./project.dto";
 import { User } from "../user/user.models";
 import { Guide } from "../Guide/guide.model";
+import { getGuideProfileByUser } from "../Guide/guide.service";
 import { sequelize } from "../../config/database";
+import { Transaction } from "sequelize";
+import { AuthUser } from "../../types/express";
 
 const NORMALIZE_CLASS_DIVISION = true;
 
@@ -131,18 +134,22 @@ export const createProjectService = async (
       );
     }
 
+    // ✅ Create project inside transaction
     const project = await Project.create(
       {
         title: payload.title,
         description: payload.description,
-        technology: payload.technology,
+        technology: payload.technology,     // ✅ matches autoAssign
         studentId,
-        // Student preference only; allocation happens later via algorithm.
         preferredGuideId: payload.preferredGuideId,
       },
       { transaction }
     );
 
+    // ✅ Run auto allocation USING SAME TRANSACTION
+    await autoAssignGuideToProject(project.id, transaction);
+
+    // ✅ Create group members
     const membersData = memberIds.map((memberId) => ({
       projectId: project.id,
       studentId: memberId,
@@ -150,7 +157,21 @@ export const createProjectService = async (
 
     await ProjectMember.bulkCreate(membersData, { transaction });
 
-    return project;
+    const createdProject = await Project.findByPk(project.id, {
+      transaction,
+      include: [
+        { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
+        { association: "preferredGuide", attributes: ["id", "fullName"] },
+        { association: "assignedGuide", attributes: ["id", "fullName"] },
+        {
+          association: "members",
+          attributes: ["id", "username", "given_name", "class", "division"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    return createdProject ?? project;
   });
 };
 
@@ -170,23 +191,171 @@ export const getStudentsService = async (currentStudentId: number) => {
   return students.sort((a: any) => (a.id === currentStudentId ? -1 : 1));
 };
 
-export const getGuideProjectsService = async (_authUserId: number) => {
-  // Do not treat preferredGuideId as actual allocation.
-  // This endpoint should return algorithm-assigned projects once allocation fields are introduced.
-  return [];
+export const getGuideProjectsService = async (authUser: AuthUser) => {
+  const guide = await getGuideProfileByUser(authUser);
+
+  if (!guide) {
+    throw new Error("Guide profile not found for the logged-in user.");
+  }
+
+  return Project.findAll({
+    where: { guideId: guide.id },
+    include: [
+      { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
+      { association: "preferredGuide", attributes: ["id", "fullName"] },
+      { association: "assignedGuide", attributes: ["id", "fullName"] },
+      {
+        association: "members",
+        attributes: ["id", "username", "given_name", "class", "division"],
+        through: { attributes: [] },
+      },
+    ],
+    order: [["createdAt", "DESC"]],
+  });
 };
 
 export const getMyProjectsService = async (studentId: number) => {
   return Project.findAll({
     where: { studentId },
     include: [
+      { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
       { association: "preferredGuide", attributes: ["id", "fullName"] },
+      { association: "assignedGuide", attributes: ["id", "fullName"] },
       {
         association: "members",
-        attributes: ["id", "username"],
+        attributes: ["id", "username", "given_name", "class", "division"],
         through: { attributes: [] },
       },
     ],
     order: [["createdAt", "DESC"]],
   });
+};
+
+
+export const autoAssignGuideToProject = async (
+  projectId: number,
+  transaction?: Transaction
+) => {
+  // 1. Get project (inside same transaction if passed)
+  const project = await Project.findByPk(projectId, { transaction });
+
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  // project.technology -> "html, css, js"
+  const technologiesText = (project as any).technology || "";
+  const preferredGuideId = (project as any).preferredGuideId ?? null;
+
+  const projectTechs = technologiesText
+    .split(",")
+    .map((t: string) => t.trim().toLowerCase())
+    .filter(Boolean);
+
+  // 2. Get all active guides
+  const guides = await Guide.findAll({
+    where: {
+      isActive: true,
+    },
+    transaction,
+  });
+
+  const scoredGuides: {
+    guide: typeof Guide.prototype;
+    score: number;
+    currentAssigned: number;
+  }[] = [];
+
+  // 3. Evaluate each guide
+  for (const guide of guides) {
+    // Count how many projects already assigned to this guide
+    const currentAssigned = await Project.count({
+      where: {
+        guideId: guide.id,            // ✅ use assigned guide, not preferredGuideId
+      },
+      transaction,
+    });
+
+    // Skip guide if at or above maxProjects
+    const maxProjects = (guide as any).maxProjects ?? 0;
+
+    if (!maxProjects || currentAssigned >= maxProjects) {
+      continue;
+    }
+
+    // Parse expertise array
+    let expertise: string[] = [];
+    const rawExpertise = (guide as any).expertise;
+
+    if (Array.isArray(rawExpertise)) {
+      expertise = rawExpertise;
+    } else if (typeof rawExpertise === "string") {
+      try {
+        const parsed = JSON.parse(rawExpertise);
+        if (Array.isArray(parsed)) {
+          expertise = parsed;
+        } else {
+          expertise = rawExpertise.split(",");
+        }
+      } catch {
+        expertise = rawExpertise.split(",");
+      }
+    }
+
+    const normalizedExpertise = expertise
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    // Skill match
+    let skillMatchCount = 0;
+    for (const tech of projectTechs) {
+      if (normalizedExpertise.includes(tech)) {
+        skillMatchCount++;
+      }
+    }
+
+    const skillScore =
+      projectTechs.length > 0
+        ? (skillMatchCount / projectTechs.length) * 70
+        : 0;
+
+    // Preferred guide bonus
+    const preferredBonus =
+      preferredGuideId && preferredGuideId === guide.id ? 20 : 0;
+
+    // Load factor (more free capacity = better)
+    const loadScore =
+      maxProjects > 0
+        ? ((maxProjects - currentAssigned) / maxProjects) * 10
+        : 0;
+
+    const totalScore = skillScore + preferredBonus + loadScore;
+
+    if (totalScore <= 0) continue;
+
+    scoredGuides.push({ guide, score: totalScore, currentAssigned });
+  }
+
+  if (!scoredGuides.length) {
+    throw new Error("No eligible guides available for allocation");
+  }
+
+  // 4. Pick best guide
+  scoredGuides.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.currentAssigned !== b.currentAssigned)
+      return a.currentAssigned - b.currentAssigned;
+    return a.guide.id - b.guide.id;
+  });
+
+  const best = scoredGuides[0].guide;
+
+  // 5. Assign guide to project
+  (project as any).guideId = best.id;   // ✅ make sure you have guideId column in projects table
+  await project.save({ transaction });
+
+  return {
+    project,
+    assignedGuide: best,
+  };
 };

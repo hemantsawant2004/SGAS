@@ -8,6 +8,7 @@ interface ProjectAttributes {
   technology: string;
   studentId: number;
   preferredGuideId: number | null;
+  guideId: number | null;
 }
 
 interface ProjectCreationAttributes
@@ -23,6 +24,7 @@ export class Project
   public technology!: string;
   public studentId!: number;
   public preferredGuideId!: number | null;
+  public guideId!: number | null;
 }
 
 Project.init(
@@ -33,6 +35,10 @@ Project.init(
     technology: { type: DataTypes.STRING, allowNull: false },
     studentId: { type: DataTypes.INTEGER, allowNull: false },
     preferredGuideId: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+    guideId: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+},
   },
   {
     sequelize,
