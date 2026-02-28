@@ -30,6 +30,7 @@ app.use("/api/admin-guides", AdminGuideRoutes);
 app.use("/api/admin-students",AdminStudentRoutes);//all students to adim
 app.use("/api/student-guides",StudentGuideRoutes);//all guides to admin
 app.use("/api/projects", projectRoutes);//create project
+app.use("/api/admin/guides", AdminGuideRoutes);//admin sets max projects limit for guide
 
 // Error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

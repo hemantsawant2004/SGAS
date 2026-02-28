@@ -15,6 +15,7 @@ export class Guide extends Model {
   public username!: string;
   public userId!: number;
   public isActive!: boolean;
+  public maxProjects!: number;
 }
 
 Guide.init({
@@ -80,6 +81,11 @@ Guide.init({
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
+  },
+  maxProjects:{
+    type:DataTypes.INTEGER,
+    allowNull:false,
+    defaultValue:1,
   },
 },
   {

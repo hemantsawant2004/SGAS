@@ -11,6 +11,9 @@ function GuidesPage() {
   const { mutate: reactivateMutate } = useReactivateGuide();
 
   const isAdmin = user?.role === "admin"; 
+ 
+const activeGuidesCount = guides.filter((g: any) => g.isActive === true).length;
+const InactiveGuidesCount = guides.filter((g: any) => g.isActive === false).length;
 
   if (isLoading)
     return (
@@ -59,7 +62,20 @@ function GuidesPage() {
             {guides.length}
           </h2>
         </div>
+           <div className="bg-white p-6 rounded-2xl shadow-sm border dark:bg-slate-800">
+          <p className="text-gray-500 text-sm dark:text-white">Active Guides</p>
+          <h2 className="text-2xl font-bold text-indigo-600 mt-2 dark:text-white">
+            {activeGuidesCount}
+          </h2>
+        </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border dark:bg-slate-800">
+          <p className="text-gray-500 text-sm dark:text-white">InActive Guides</p>
+          <h2 className="text-2xl font-bold text-indigo-600 mt-2 dark:text-white">
+            {InactiveGuidesCount}
+          </h2>
+        </div>
       </div>
+  
 
       {/* Guides Grid */}
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 ">
@@ -93,7 +109,11 @@ function GuidesPage() {
                     <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded-full">
                       Inactive
                     </span>
+                    
                   )}
+                  <span className="text-xs text-gray-500 dark:text-black px-2 py-1 bg-green-100 text-green-600 rounded-full">
+                  limit = {guide.maxProjects} 
+                  </span>
                 </div>
               </div>
             </div>
@@ -126,7 +146,6 @@ function GuidesPage() {
               <span className="text-sm text-gray-500 dark:text-white">
                 {guide.experience} years experience
               </span>
-
               {/* Admin Controls */}
               {isAdmin && (
                 guide.isActive ? (
