@@ -13,6 +13,14 @@ import NotFound from '../../features/NotFound';
 import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 import Guide from '../../features/guide/pages/Guide';
 import GuidesPage from '../../features/admin/guides/pages/GuidesPages';
+import StudentsPage from '../../features/admin/students/pages/StudentsPage';
+import AdminProjectActivityPage from '../../features/admin/pages/AdminProjectActivityPage';
+import AdminGuideActivityPage from '../../features/admin/pages/AdminGuideActivityPage';
+import AdminStudentActivityPage from '../../features/admin/pages/AdminStudentActivityPage';
+import StudentGuidesPage from '../../features/student/pages/StudentGuidesPage';
+import StudentProjectSubmissionCelebrationPage from '../../features/student/StudentProjectSubmissionCelebrationPage';
+import StudentProjectsPage from '../../features/student/pages/StudentProjectsPage';
+import GuideAllocatedProjectsPage from '../../features/guide/pages/GuideAllocatedProjectsPage';
 
 
 
@@ -24,7 +32,7 @@ const router = createBrowserRouter([
       children: [
         { path: '/', element: <Login /> },
         { path: '/signup', element: <Signup /> },
-        {path:'//forgot-password', element:<ForgotPassword/>},
+        { path: '/forgot-password', element: <ForgotPassword /> },
         { path: "*", element: <NotFound/> }
       ]
     }]
@@ -43,6 +51,10 @@ const router = createBrowserRouter([
           {path:"/guide/dashboard", element:<GuideDashboard/>},
           {path:"/student/dashboard", element:<StudentDashboard/>},
           {path:"/guide/createprofile", element:<Guide/>},
+          { path: "/guide/allocatedprojects", element: <GuideAllocatedProjectsPage /> },
+          { path: "/student/guides", element: <StudentGuidesPage /> },
+          { path: "/student/projects/new", element: <StudentProjectSubmissionCelebrationPage /> },
+          { path: "/student/projects", element: <StudentProjectsPage /> },
           { path: "*", element: <NotFound /> },
         ],
       }
@@ -59,10 +71,11 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/dashboard", element: <DashboardResolver /> },
+          { path: "/admin/projects", element: <AdminProjectActivityPage /> },
+          { path: "/admin/guide-activity", element: <AdminGuideActivityPage /> },
+          { path: "/admin/student-activity", element: <AdminStudentActivityPage /> },
           { path: "/admin-guides", element: <GuidesPage /> },
-
-         //{ path: "/ho/admin/dashboard", element: <AdminDashboard /> },
-
+          { path: "/admin/students", element: <StudentsPage /> },
         ],
       }
     ]

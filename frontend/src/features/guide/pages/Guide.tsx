@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Camera } from "lucide-react";
 import { useAppSelector } from "../../../app/hooks";
 import type { CreateGuideProfileDto } from "../dto/guide.dto";
-import { Pencil } from "lucide-react";
 import {
   useCreateGuideProfile,
   useMyGuideProfile,

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAppSelector } from "../../../app/hooks";
 import {
   createGuideProfile,
   getMyGuideProfile,

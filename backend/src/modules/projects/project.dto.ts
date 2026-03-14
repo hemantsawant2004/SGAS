@@ -8,4 +8,9 @@ export const createProjectSchema = z.object({
   preferredGuideId: z.coerce.number().int().positive(),
 });
 
+export const manualAssignGuideSchema = z.object({
+  guideId: z.coerce.number().int().positive(),
+});
+
 export type CreateProjectDto = z.infer<typeof createProjectSchema>;
+export type ManualAssignGuideDto = z.infer<typeof manualAssignGuideSchema>;

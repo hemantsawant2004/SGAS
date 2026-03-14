@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+// import { activateGuide, getGuides } from "./guide.controller";
+// import { deactivateGuide } from "./guide.controller";
+const students_controller_1 = require("./students.controller");
+const AdminStudentRoutes = (0, express_1.Router)();
+AdminStudentRoutes.get("/", students_controller_1.getStudents);
+AdminStudentRoutes.patch("/:id/", students_controller_1.updateStudents);
+AdminStudentRoutes.delete("/:id/", students_controller_1.deleteStudents);
+exports.default = AdminStudentRoutes;

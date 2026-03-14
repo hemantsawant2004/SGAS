@@ -6,7 +6,6 @@ import { useLogin } from "../hooks/useLogin";
 export default function ForgotPassword() {
   const {
     isSubmitting,
-    errors,
     login
   } = useLogin()
   const [username, setUsername] = useState("");

@@ -40,12 +40,9 @@ export default function AppLayout() {
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       {/* HEADER */}
       <Header
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
         userMenuOpen={userMenuOpen}
         setUserMenuOpen={setUserMenuOpen}
         initial={initials}
-        userRole={user?.role || ""}
         username={user?.username || ""}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

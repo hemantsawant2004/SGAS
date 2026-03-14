@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import type { ZodSchema } from "zod";
+import type { ZodType } from "zod";
 
 type AnyShape = {
   body?: unknown;
@@ -7,7 +7,7 @@ type AnyShape = {
   query?: unknown;
 };
 
-export const validate = (schema: ZodSchema): RequestHandler => {
+export const validate = (schema: ZodType<AnyShape>): RequestHandler => {
   return (req, res, next) => {
     const result = schema.safeParse({
       body: req.body,

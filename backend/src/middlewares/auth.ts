@@ -10,8 +10,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   const bearer = header && header.startsWith("Bearer ") ? header.slice(7) : null;
   console.log("bearer",bearer)
-  const token =
-    bearer || req.cookies?.accessToken || req.cookies?.token;
+  const token = bearer || req.cookies?.accessToken;
   console.log("token kedarrrr",token)
   if (!token) {
     console.log("inside not authorised",token)

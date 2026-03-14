@@ -1,174 +1,214 @@
-import { useDeleteGuide, useGuides, useReactivateGuide } from "../hooks/useGuides";
+import {
+  useDeleteGuide,
+  useGuides,
+  useReactivateGuide,
+  useUpdateAllGuidesMaxProjects,
+  useUpdateGuideMaxProjects,
+} from "../hooks/useGuides";
 import { useState } from "react";
 import { useAppSelector } from "../../../../app/hooks";
 
 function GuidesPage() {
   const { data: guides = [], isLoading, isError } = useGuides();
   const [search, setSearch] = useState("");
+  const [bulkLimit, setBulkLimit] = useState("");
+  const [guideLimits, setGuideLimits] = useState<Record<number, string>>({});
   const user = useAppSelector((s) => s.auth.user);
 
   const { mutate: deactivateMutate } = useDeleteGuide();
   const { mutate: reactivateMutate } = useReactivateGuide();
+  const { mutate: setGuideLimit } = useUpdateGuideMaxProjects();
+  const { mutate: setAllGuideLimits } = useUpdateAllGuidesMaxProjects();
 
-  const isAdmin = user?.role === "admin"; 
- 
-const activeGuidesCount = guides.filter((g: any) => g.isActive === true).length;
-const InactiveGuidesCount = guides.filter((g: any) => g.isActive === false).length;
+  const isAdmin = user?.role === "admin";
 
-  if (isLoading)
+  const activeGuidesCount = guides.filter((g: any) => g.isActive === true).length;
+  const inactiveGuidesCount = guides.filter((g: any) => g.isActive === false).length;
+
+  if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-medium text-gray-600 animate-pulse">
-          Loading guides...
-        </p>
+      <div className="flex h-96 items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+          <p className="mt-4 text-slate-500 font-medium">Loading guide directory...</p>
+        </div>
       </div>
     );
+  }
 
-  if (isError)
+  if (isError) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-medium text-red-500">
-          Error fetching guides
-        </p>
+      <div className="flex h-96 items-center justify-center text-red-500 font-medium">
+        Error fetching guides. Please try again later.
       </div>
     );
+  }
 
   const filteredGuides = guides.filter((guide: any) =>
-    guide.fullname.toLowerCase().includes(search.toLowerCase())
+    (guide.fullName ?? guide.fullname ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen p-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
-        <h4 className="text-4xl font-bold text-gray-800 dark:text-white font-mono">
-          Welcome, {user?.username}
-        </h4>
-
-        <input
-          type="text"
-          placeholder="Search guide..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mt-4 md:mt-0 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full md:w-64 dark:bg-slate-800"
-        />
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 ">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border dark:bg-slate-800">
-          <p className="text-gray-500 text-sm dark:text-white">Total Guides</p>
-          <h2 className="text-2xl font-bold text-indigo-600 mt-2 dark:text-white">
-            {guides.length}
-          </h2>
-        </div>
-           <div className="bg-white p-6 rounded-2xl shadow-sm border dark:bg-slate-800">
-          <p className="text-gray-500 text-sm dark:text-white">Active Guides</p>
-          <h2 className="text-2xl font-bold text-indigo-600 mt-2 dark:text-white">
-            {activeGuidesCount}
-          </h2>
-        </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border dark:bg-slate-800">
-          <p className="text-gray-500 text-sm dark:text-white">InActive Guides</p>
-          <h2 className="text-2xl font-bold text-indigo-600 mt-2 dark:text-white">
-            {InactiveGuidesCount}
-          </h2>
+    <div className="space-y-8 py-6">
+      {/* Top Header & Search */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        {/* <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Guides Directory
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">Manage faculty workload and project allocations.</p>
+        </div> */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-800 dark:bg-slate-900 md:w-80"
+          />
+          <svg className="absolute left-3 top-3 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
       </div>
-  
 
-      {/* Guides Grid */}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 ">
-        {filteredGuides.map((guide: any) => (
-          <div
-            key={guide.id}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 p-6 border border-gray-100 dark:bg-slate-800 dark:text-white"
-          >
-            {/* Top Section */}
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-xl font-bold text-white shadow-md">
-                {guide.fullname?.charAt(0).toUpperCase()}
-              </div>
-
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {guide.fullname}
-                </h2>
-
-                <div className="flex items-center gap-2 mt-1 dark:text-white">
-                  <span className="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full">
-                    {guide.departmentName}
-                  </span>
-
-                  {/* Active / Inactive Badge */}
-                  {guide.isActive ? (
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded-full">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded-full">
-                      Inactive
-                    </span>
-                    
-                  )}
-                  <span className="text-xs text-gray-500 dark:text-black px-2 py-1 bg-green-100 text-green-600 rounded-full">
-                  limit = {guide.maxProjects} 
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Expertise */}
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-600 mb-2 dark:text-white">
-                Expertise
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {(Array.isArray(guide.expertise)
-                  ? guide.expertise
-                  : typeof guide.expertise === "string"
-                  ? guide.expertise.split(",")
-                  : []
-                ).map((skill: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition"
-                  >
-                    {skill.trim()}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-between items-center mt-6 pt-4 border-t">
-              <span className="text-sm text-gray-500 dark:text-white">
-                {guide.experience} years experience
-              </span>
-              {/* Admin Controls */}
-              {isAdmin && (
-                guide.isActive ? (
-                  <button
-                    onClick={() => deactivateMutate(guide.id)}
-                    className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                  >
-                    Deactivate
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => reactivateMutate(guide.id)}
-                    className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-                  >
-                    Activate
-                  </button>
-                )
-              )}
-            </div>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          { label: "Total Guides", value: guides.length, color: "text-slate-900" },
+          { label: "Active", value: activeGuidesCount, color: "text-slate-900" },
+          { label: "Inactive", value: inactiveGuidesCount, color: "text-slate-900" },
+        ].map((stat, i) => (
+          <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{stat.label}</p>
+            <p className={`mt-2 text-3xl font-black ${stat.color} dark:text-white`}>{stat.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Bulk Action Bar */}
+      {isAdmin && (
+        <div className="flex dark:text-white flex-col items-center justify-between gap-4 rounded-2xl border border-2px p-6 text-black shadow-lg shadow-indigo-200 dark:shadow-none md:flex-row">
+          <div>
+            <h3 className="text-lg font-bold">Assign Max Limit to all guides</h3>
+            {/* <p className="text-sm text-indigo-100">Update project limits for all active guides instantly.</p> */}
+          </div>
+          <div className="flex w-full gap-2 md:w-auto">
+            <input
+              type="number"
+              placeholder="Max"
+              value={bulkLimit}
+              onChange={(e) => setBulkLimit(e.target.value)}
+              className="w-20 border rounded-lg bg-white/20 text-black px-3 py-2 placeholder:text-indigo-200 focus:ring-2 focus:ring-white"
+            />
+            <button
+              onClick={() => setAllGuideLimits(Number(bulkLimit))}
+              className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-indigo-50 transition-colors"
+            >
+              Apply to All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Table Layout */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
+                <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Guide</th>
+                <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Department & Expertise</th>
+                <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Limit</th>
+                <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Status</th>
+                {isAdmin && <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">Actions</th>}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredGuides.map((guide: any) => (
+                <tr key={guide.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  {/* Guide Info */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+                        {(guide.fullName ?? guide.fullname ?? "G")[0]}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 dark:text-white">{guide.fullName ?? guide.fullname}</p>
+                        <p className="text-xs text-slate-500">{guide.experience} years exp.</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Dept & Skills */}
+                  <td className="px-6 py-4">
+                    <div className="space-y-2">
+                      {/* <span className="text-[10px] font-bold uppercase tracking-tight text-indigo-600 dark:text-indigo-400">
+                        {guide.departmentName}
+                      </span> */}
+                      <div className="flex flex-wrap gap-1">
+                        {(Array.isArray(guide.expertise) ? guide.expertise : (guide.expertise || "").split(",")).slice(0, 3).map((skill: string, i: number) => (
+                          <span key={i} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                            {skill.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Max Projects Input */}
+                  <td className="px-6 py-4">
+                    {isAdmin ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          className="w-14 rounded-md border border-slate-200 p-1 text-center text-xs dark:border-slate-700 dark:bg-slate-800"
+                          value={guideLimits[guide.id] ?? guide.maxProjects ?? ""}
+                          onChange={(e) => setGuideLimits(prev => ({ ...prev, [guide.id]: e.target.value }))}
+                        />
+                        <button 
+                          onClick={() => setGuideLimit({ id: guide.id, maxProjects: Number(guideLimits[guide.id] ?? guide.maxProjects) })}
+                          className="text-xs font-bold text-indigo-600 hover:text-indigo-800"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="font-semibold">{guide.maxProjects}</span>
+                    )}
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                      guide.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${guide.isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+                      {guide.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+
+                  {/* Admin Actions */}
+                  {isAdmin && (
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => guide.isActive ? deactivateMutate(guide.id) : reactivateMutate(guide.id)}
+                        className={`text-xs font-bold uppercase tracking-widest hover:underline ${
+                          guide.isActive ? "text-red-500" : "text-emerald-600"
+                        }`}
+                      >
+                        {guide.isActive ? "Deactivate" : "Activate"}
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
+
 export default GuidesPage;

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../../core/auth");
+const guide_controller_1 = require("./guide.controller");
+const guideRouter = (0, express_1.Router)();
+guideRouter.post("/profile", (0, auth_1.auth)(), auth_1.checkGuide, guide_controller_1.createGuide);
+guideRouter.get("/profile/me", (0, auth_1.auth)(), auth_1.checkGuide, guide_controller_1.getMyGuideProfile);
+guideRouter.patch("/profile/me", (0, auth_1.auth)(), auth_1.checkGuide, guide_controller_1.updateMyGuideProfile);
+exports.default = guideRouter;

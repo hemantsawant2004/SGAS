@@ -6,26 +6,20 @@ import { toggleMode } from '../../features/theme/themeSlice';
 import { logout } from '../../features/auth/authSlice';
 
 interface HeaderProps {
-  mobileMenuOpen: boolean;
-  setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userMenuOpen: boolean
   setUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   initial: string
   username: string
   sidebarOpen: boolean;
-  userRole: string;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function Header({
-  mobileMenuOpen,
-  setMobileMenuOpen,
   userMenuOpen,
   setUserMenuOpen,
   initial,
   username,
   sidebarOpen,
-  userRole,
   setSidebarOpen
 }: HeaderProps) {
   const theme = useAppSelector((s) => s.theme.mode);

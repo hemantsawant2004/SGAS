@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.checkStudent = exports.checkGuide = exports.checkAdmin = exports.auth = void 0;
+const auth_1 = require("../middlewares/auth");
+const requireRole_1 = require("../middlewares/requireRole");
+const auth = () => auth_1.requireAuth;
+exports.auth = auth;
+exports.checkAdmin = (0, requireRole_1.requireRole)(["admin"]);
+exports.checkGuide = (0, requireRole_1.requireRole)(["guide"]);
+exports.checkStudent = (0, requireRole_1.requireRole)(["student"]);

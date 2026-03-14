@@ -9,11 +9,102 @@ import { Transaction } from "sequelize";
 import { AuthUser } from "../../types/express";
 
 const NORMALIZE_CLASS_DIVISION = true;
+const PROJECT_ALLOCATION_ISSUE_MESSAGES = {
+  noActiveGuides: "No active guides are available for allocation. Admin review is required.",
+  noCapacity:
+    "All active guides have reached maximum capacity. Admin review is required.",
+  noGuideAvailable:
+    "No guide is currently available for automatic allocation. Admin review is required.",
+} as const;
 
 const normalizeAcademicValue = (value: string | null) => {
   if (!value) return "";
   if (!NORMALIZE_CLASS_DIVISION) return value;
   return value.replace(/\s+/g, "").trim().toLowerCase();
+};
+
+const getNormalizedGuideExpertise = (rawExpertise: unknown) => {
+  let expertise: string[] = [];
+
+  if (Array.isArray(rawExpertise)) {
+    expertise = rawExpertise as string[];
+  } else if (typeof rawExpertise === "string") {
+    try {
+      const parsed = JSON.parse(rawExpertise);
+      expertise = Array.isArray(parsed) ? parsed : rawExpertise.split(",");
+    } catch {
+      expertise = rawExpertise.split(",");
+    }
+  }
+
+  return expertise.map((entry) => entry.trim().toLowerCase()).filter(Boolean);
+};
+
+const getProjectTechnologies = (technology: string | null | undefined) =>
+  (technology || "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+const getAllocationIssueCode = async (
+  transaction?: Transaction
+): Promise<keyof typeof PROJECT_ALLOCATION_ISSUE_MESSAGES> => {
+  const activeGuides = await Guide.findAll({
+    where: { isActive: true },
+    attributes: ["id", "maxProjects"],
+    transaction,
+  });
+
+  if (!activeGuides.length) {
+    return "noActiveGuides";
+  }
+
+  for (const guide of activeGuides) {
+    const maxProjects = (guide as any).maxProjects ?? 0;
+
+    if (maxProjects <= 0) {
+      continue;
+    }
+
+    const assignedProjects = await Project.count({
+      where: { guideId: guide.id },
+      transaction,
+    });
+
+    if (assignedProjects < maxProjects) {
+      return "noGuideAvailable";
+    }
+  }
+
+  return "noCapacity";
+};
+
+const buildAllocationIssue = (
+  code: keyof typeof PROJECT_ALLOCATION_ISSUE_MESSAGES
+) => ({
+  code,
+  message: PROJECT_ALLOCATION_ISSUE_MESSAGES[code],
+});
+
+const enrichProjectAllocationState = async (
+  project: any,
+  transaction?: Transaction
+) => {
+  const plainProject = typeof project.toJSON === "function" ? project.toJSON() : project;
+
+  if (plainProject.guideId || plainProject.assignedGuide) {
+    return {
+      ...plainProject,
+      allocationIssue: null,
+    };
+  }
+
+  const issueCode = await getAllocationIssueCode(transaction);
+
+  return {
+    ...plainProject,
+    allocationIssue: buildAllocationIssue(issueCode),
+  };
 };
 
 export const createProjectService = async (
@@ -147,7 +238,7 @@ export const createProjectService = async (
     );
 
     // ✅ Run auto allocation USING SAME TRANSACTION
-    await autoAssignGuideToProject(project.id, transaction);
+    const allocationResult = await autoAssignGuideToProject(project.id, transaction);
 
     // ✅ Create group members
     const membersData = memberIds.map((memberId) => ({
@@ -171,7 +262,13 @@ export const createProjectService = async (
       ],
     });
 
-    return createdProject ?? project;
+    const projectWithRelations = createdProject ?? project;
+
+    if (allocationResult.allocationIssue) {
+      return enrichProjectAllocationState(projectWithRelations, transaction);
+    }
+
+    return enrichProjectAllocationState(projectWithRelations, transaction);
   });
 };
 
@@ -198,7 +295,7 @@ export const getGuideProjectsService = async (authUser: AuthUser) => {
     throw new Error("Guide profile not found for the logged-in user.");
   }
 
-  return Project.findAll({
+  const projects = await Project.findAll({
     where: { guideId: guide.id },
     include: [
       { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
@@ -212,10 +309,12 @@ export const getGuideProjectsService = async (authUser: AuthUser) => {
     ],
     order: [["createdAt", "DESC"]],
   });
+
+  return Promise.all(projects.map((project) => enrichProjectAllocationState(project)));
 };
 
 export const getMyProjectsService = async (studentId: number) => {
-  return Project.findAll({
+  const projects = await Project.findAll({
     where: { studentId },
     include: [
       { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
@@ -228,6 +327,219 @@ export const getMyProjectsService = async (studentId: number) => {
       },
     ],
     order: [["createdAt", "DESC"]],
+  });
+
+  return Promise.all(projects.map((project) => enrichProjectAllocationState(project)));
+};
+
+export const getAdminOverviewService = async () => {
+  const projects = await Project.findAll({
+    include: [
+      {
+        association: "creator",
+        attributes: ["id", "username", "given_name", "class", "division", "rollNumber"],
+      },
+      { association: "preferredGuide", attributes: ["id", "fullName", "departmentName"] },
+      { association: "assignedGuide", attributes: ["id", "fullName", "departmentName"] },
+      {
+        association: "members",
+        attributes: ["id", "username", "given_name", "class", "division", "rollNumber"],
+        through: { attributes: [] },
+      },
+    ],
+    order: [["createdAt", "DESC"]],
+  });
+
+  const guides = await Guide.findAll({
+    attributes: [
+      "id",
+      "fullName",
+      "departmentName",
+      "isActive",
+      "maxProjects",
+      "username",
+    ],
+    order: [["fullName", "ASC"]],
+  });
+
+  const students = await User.findAll({
+    where: { role: "student" },
+    attributes: ["id", "username", "given_name", "class", "division", "rollNumber"],
+    order: [["username", "ASC"]],
+  });
+
+  const projectsByGuideId = new Map<number, number>();
+  const projectsByStudentId = new Map<number, number>();
+
+  for (const project of projects as any[]) {
+    if (project.guideId) {
+      projectsByGuideId.set(
+        project.guideId,
+        (projectsByGuideId.get(project.guideId) ?? 0) + 1
+      );
+    }
+
+    if (project.studentId) {
+      projectsByStudentId.set(
+        project.studentId,
+        (projectsByStudentId.get(project.studentId) ?? 0) + 1
+      );
+    }
+
+    for (const member of project.members ?? []) {
+      const memberId = member.id as number;
+      projectsByStudentId.set(memberId, (projectsByStudentId.get(memberId) ?? 0) + 1);
+    }
+  }
+
+  const guideActivity = guides.map((guide: any) => ({
+    id: guide.id,
+    fullName: guide.fullName,
+    departmentName: guide.departmentName,
+    username: guide.username,
+    isActive: guide.isActive,
+    maxProjects: guide.maxProjects,
+    assignedProjects: projectsByGuideId.get(guide.id) ?? 0,
+    remainingCapacity: Math.max((guide.maxProjects ?? 0) - (projectsByGuideId.get(guide.id) ?? 0), 0),
+  }));
+
+  const studentActivity = students.map((student: any) => ({
+    id: student.id,
+    username: student.username,
+    fullName: student.given_name,
+    class: student.get("class"),
+    division: student.get("division"),
+    rollNumber: student.get("rollNumber"),
+    projectCount: projectsByStudentId.get(student.id) ?? 0,
+    isAssigned: (projectsByStudentId.get(student.id) ?? 0) > 0,
+  }));
+
+  const projectsWithAllocationState = await Promise.all(
+    (projects as any[]).map((project) => enrichProjectAllocationState(project))
+  );
+
+  const allocationAlerts = projectsWithAllocationState
+    .filter((project: any) => project.allocationIssue)
+    .map((project: any) => ({
+      projectId: project.id,
+      projectTitle: project.title,
+      issueCode: project.allocationIssue.code,
+      message: project.allocationIssue.message,
+      creatorName:
+        project.creator?.given_name ||
+        project.creator?.username ||
+        `Student ${project.studentId}`,
+      preferredGuideName:
+        project.preferredGuide?.fullName ||
+        project.preferredGuide?.fullname ||
+        null,
+    }));
+
+  return {
+    summary: {
+      totalProjects: projectsWithAllocationState.length,
+      allocatedProjects: projectsWithAllocationState.filter((project: any) => Boolean(project.guideId)).length,
+      unallocatedProjects: projectsWithAllocationState.filter((project: any) => !project.guideId).length,
+      totalGuideActivities: guideActivity.filter((guide) => guide.assignedProjects > 0).length,
+      totalStudentActivities: studentActivity.filter((student) => student.projectCount > 0).length,
+    },
+    projects: projectsWithAllocationState,
+    guideActivity,
+    studentActivity,
+    allocationAlerts,
+  };
+};
+
+export const deleteProjectService = async (
+  projectId: number,
+  authUser: AuthUser
+) => {
+  return sequelize.transaction(async (transaction) => {
+    const project = await Project.findByPk(projectId, { transaction });
+
+    if (!project) {
+      throw new Error("Project not found.");
+    }
+
+    if (authUser.role === "guide") {
+      const guide = await getGuideProfileByUser(authUser);
+
+      if (!guide) {
+        throw new Error("Guide profile not found for the logged-in user.");
+      }
+
+      if ((project as any).guideId !== guide.id) {
+        throw new Error("You can delete only projects assigned to you.");
+      }
+    } else if (authUser.role !== "admin") {
+      throw new Error("You are not allowed to delete this project.");
+    }
+
+    await ProjectMember.destroy({
+      where: { projectId: project.id },
+      transaction,
+    });
+
+    await project.destroy({ transaction });
+
+    return { id: projectId };
+  });
+};
+
+export const manuallyAssignGuideToProjectService = async (
+  projectId: number,
+  guideId: number
+) => {
+  return sequelize.transaction(async (transaction) => {
+    const project = await Project.findByPk(projectId, { transaction });
+
+    if (!project) {
+      throw new Error("Project not found.");
+    }
+
+    if ((project as any).guideId) {
+      throw new Error("Only pending projects can be manually allocated.");
+    }
+
+    const guide = await Guide.findOne({
+      where: { id: guideId, isActive: true },
+      transaction,
+    });
+
+    if (!guide) {
+      throw new Error("Selected guide is invalid or inactive.");
+    }
+
+    const currentAssignedProjects = await Project.count({
+      where: { guideId: guide.id },
+      transaction,
+    });
+
+    const currentMaxProjects = (guide as any).maxProjects ?? 0;
+
+    if (currentAssignedProjects >= currentMaxProjects) {
+      (guide as any).maxProjects = currentAssignedProjects + 1;
+      await guide.save({ transaction });
+    }
+
+    (project as any).guideId = guide.id;
+    await project.save({ transaction });
+
+    const updatedProject = await Project.findByPk(project.id, {
+      transaction,
+      include: [
+        { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
+        { association: "preferredGuide", attributes: ["id", "fullName"] },
+        { association: "assignedGuide", attributes: ["id", "fullName"] },
+        {
+          association: "members",
+          attributes: ["id", "username", "given_name", "class", "division"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    return enrichProjectAllocationState(updatedProject ?? project, transaction);
   });
 };
 
@@ -247,10 +559,7 @@ export const autoAssignGuideToProject = async (
   const technologiesText = (project as any).technology || "";
   const preferredGuideId = (project as any).preferredGuideId ?? null;
 
-  const projectTechs = technologiesText
-    .split(",")
-    .map((t: string) => t.trim().toLowerCase())
-    .filter(Boolean);
+  const projectTechs = getProjectTechnologies(technologiesText);
 
   // 2. Get all active guides
   const guides = await Guide.findAll({
@@ -284,27 +593,7 @@ export const autoAssignGuideToProject = async (
     }
 
     // Parse expertise array
-    let expertise: string[] = [];
-    const rawExpertise = (guide as any).expertise;
-
-    if (Array.isArray(rawExpertise)) {
-      expertise = rawExpertise;
-    } else if (typeof rawExpertise === "string") {
-      try {
-        const parsed = JSON.parse(rawExpertise);
-        if (Array.isArray(parsed)) {
-          expertise = parsed;
-        } else {
-          expertise = rawExpertise.split(",");
-        }
-      } catch {
-        expertise = rawExpertise.split(",");
-      }
-    }
-
-    const normalizedExpertise = expertise
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    const normalizedExpertise = getNormalizedGuideExpertise((guide as any).expertise);
 
     // Skill match
     let skillMatchCount = 0;
@@ -337,7 +626,13 @@ export const autoAssignGuideToProject = async (
   }
 
   if (!scoredGuides.length) {
-    throw new Error("No eligible guides available for allocation");
+    const issueCode = await getAllocationIssueCode(transaction);
+
+    return {
+      project,
+      assignedGuide: null,
+      allocationIssue: buildAllocationIssue(issueCode),
+    };
   }
 
   // 4. Pick best guide
@@ -357,5 +652,6 @@ export const autoAssignGuideToProject = async (
   return {
     project,
     assignedGuide: best,
+    allocationIssue: null,
   };
 };

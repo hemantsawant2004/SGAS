@@ -42,7 +42,7 @@ function Signup() {
 
           {/* STEP INDICATOR */}
           <div className="flex gap-2">
-            {(selectedRole === "student" ? [1,2,3]:[1,3]).map((s,index)=>(
+            {(selectedRole === "student" ? [1,2,3]:[1,3]).map((s)=>(
               <div
               key={s}
               className={`h-2 flex-1 rounded ${

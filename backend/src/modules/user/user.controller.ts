@@ -255,6 +255,7 @@ export async function login(req: Request, res: Response) {
     secure: process.env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
+  res.clearCookie("token");
 
   // Backward compatibility for older clients using "token"
   // res.cookie("token", accessToken, {
@@ -279,6 +280,7 @@ export async function logout(req: Request, res: Response) {
   }
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
+  res.clearCookie("token");
 
   return res.json({ message: "Logged out" });
 }
@@ -337,6 +339,7 @@ export async function refresh(req: Request, res: Response) {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    res.clearCookie("token");
 
     return res.json({
       id: user.id,
