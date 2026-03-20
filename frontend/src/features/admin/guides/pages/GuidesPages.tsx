@@ -90,7 +90,7 @@ function GuidesPage() {
       {isAdmin && (
         <div className="flex dark:text-white flex-col items-center justify-between gap-4 rounded-2xl border border-2px p-6 text-black shadow-lg shadow-indigo-200 dark:shadow-none md:flex-row">
           <div>
-            <h3 className="text-lg font-bold">Assign Max Limit to all guides</h3>
+            <h3 className="text-lg font-bold">You can Assign Max Limit to all guides</h3>
             {/* <p className="text-sm text-indigo-100">Update project limits for all active guides instantly.</p> */}
           </div>
           <div className="flex w-full gap-2 md:w-auto">

@@ -9,10 +9,14 @@ interface ProjectAttributes {
   studentId: number;
   preferredGuideId: number | null;
   guideId: number | null;
+  phaseStatuses: Array<{
+    phase: string;
+    status: "pending" | "in_progress" | "completed";
+  }>;
 }
 
 interface ProjectCreationAttributes
-  extends Optional<ProjectAttributes, "id" | "preferredGuideId"> {}
+  extends Optional<ProjectAttributes, "id" | "preferredGuideId" | "guideId" | "phaseStatuses"> {}
 
 export class Project
   extends Model<ProjectAttributes, ProjectCreationAttributes>
@@ -25,7 +29,26 @@ export class Project
   public studentId!: number;
   public preferredGuideId!: number | null;
   public guideId!: number | null;
+  public phaseStatuses!: Array<{
+    phase: string;
+    status: "pending" | "in_progress" | "completed";
+  }>;
 }
+
+export const PROJECT_PHASES = [
+  "intro",
+  "system analysis",
+  "system design",
+  "reports",
+  "rough documentation",
+  "final submission",
+] as const;
+
+export const buildDefaultProjectPhaseStatuses = () =>
+  PROJECT_PHASES.map((phase) => ({
+    phase,
+    status: "pending" as const,
+  }));
 
 Project.init(
   {
@@ -36,9 +59,15 @@ Project.init(
     studentId: { type: DataTypes.INTEGER, allowNull: false },
     preferredGuideId: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
     guideId: {
-  type: DataTypes.INTEGER,
-  allowNull: true,
-},
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
+    phaseStatuses: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: buildDefaultProjectPhaseStatuses(),
+    },
   },
   {
     sequelize,

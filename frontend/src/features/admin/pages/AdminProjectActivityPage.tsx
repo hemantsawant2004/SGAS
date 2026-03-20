@@ -5,6 +5,31 @@ import {
   useManualProjectGuideAssignment,
 } from "../hooks/useAdminOverview";
 
+const formatDateTime = (value?: string | null) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+
+const formatPhaseLabel = (value?: string | null) => {
+  if (!value) return "-";
+  if (value === "Completed") return value;
+
+  return value
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
 export default function AdminProjectActivityPage() {
   const { data, isLoading, isError } = useAdminOverview();
   const [search, setSearch] = useState("");
@@ -22,8 +47,9 @@ export default function AdminProjectActivityPage() {
         project.preferredGuide?.fullName ||
         project.preferredGuide?.fullname ||
         "";
+      const status = `${project.currentPhase || ""} ${project.currentPhaseStatus || ""}`;
 
-      return `${project.title} ${creator} ${guide} ${project.technology}`
+      return `${project.title} ${creator} ${guide} ${project.technology} ${status}`
         .toLowerCase()
         .includes(search.toLowerCase());
     });
@@ -46,10 +72,10 @@ export default function AdminProjectActivityPage() {
     <section className="space-y-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
+          {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
+          {/* <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
             Project activity
-          </h1>
+          </h1> */}
         </div>
         <input
           value={search}
@@ -81,7 +107,7 @@ export default function AdminProjectActivityPage() {
                 className="rounded-2xl border border-amber-200 bg-white/70 px-4 py-3 dark:border-amber-900 dark:bg-slate-900/70"
               >
                 <p className="font-medium text-slate-900 dark:text-white">
-                  {alert.projectTitle} · {alert.creatorName}
+                  {alert.projectTitle} | {alert.creatorName}
                 </p>
                 <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{alert.message}</p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -103,6 +129,7 @@ export default function AdminProjectActivityPage() {
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Student Team</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Preferred Guide</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Allocated Guide</th>
+                <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Pending action</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Delete</th>
               </tr>
@@ -116,29 +143,31 @@ export default function AdminProjectActivityPage() {
 
                 return (
                 <tr key={project.id}>
+
                   <td className="px-5 py-4 align-top">
                     <p className="font-medium text-slate-800 dark:text-white">{project.title}</p>
-                    {/* <p className="mt-1 text-xs text-slate-500">{project.technology}</p> */}
                   </td>
-                  <td className="px-5 py-4 align-top">
-                     <p className="mt-1 text-xs text-slate-100">{project.technology}</p>
+
+                  <td className="px-5 py-4 align-top text-slate-600 dark:text-slate-300">
+                    {project.technology}
                   </td>
+
                   <td className="px-5 py-4 align-top">
                     <p className="font-medium text-slate-800 dark:text-white">
                       {project.creator?.given_name || project.creator?.username || "-"}
                     </p>
-                    {/* <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                       Members:{" "}
                       {project.members?.length
-                        ? project.members
-                            .map((member) => member.given_name || member.username)
-                            .join(", ")
+                        ? project.members.map((member) => member.given_name || member.username).join(", ")
                         : "No extra members"}
-                    </p> */}
+                    </p>
                   </td>
+
                   <td className="px-5 py-4 align-top text-slate-600 dark:text-slate-500">
                     {project.preferredGuide?.fullName || project.preferredGuide?.fullname || "-"}
                   </td>
+
                   <td className="px-5 py-4 align-top">
                     <span className="rounded-full px-3 py-1 text-xs font-medium text-black dark:text-white">
                       {project.assignedGuide?.fullName ||
@@ -151,6 +180,24 @@ export default function AdminProjectActivityPage() {
                       </p>
                     ) : null}
                   </td>
+                  
+                  <td className="px-5 py-4 align-top">
+                    <div className="space-y-2">
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${project.currentPhaseStatus === "completed"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/30 dark:text-emerald-300"
+                        : project.currentPhaseStatus === "in_progress"
+                          ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-300"
+                          : "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300"}`}>
+                        {formatPhaseLabel(project.currentPhase)}
+                      </span>
+                      {project.completedAt ? (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Completed on {formatDateTime(project.completedAt)}
+                        </p>
+                      ) : null}
+                    </div>
+                  </td>
+
                   <td className="px-5 py-4 align-top">
                     {isPending ? (
                       <div className="flex min-w-[240px] flex-col gap-2">
@@ -191,6 +238,7 @@ export default function AdminProjectActivityPage() {
                       </span>
                     )}
                   </td>
+
                   <td className="px-5 py-4 align-top">
                     <button
                       type="button"
@@ -201,6 +249,7 @@ export default function AdminProjectActivityPage() {
                       {isDeleting ? "Deleting..." : "Delete"}
                     </button>
                   </td>
+
                 </tr>
               )})}
             </tbody>

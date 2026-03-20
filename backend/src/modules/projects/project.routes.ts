@@ -1,15 +1,19 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { requireAuth } from "../../middlewares/auth";
 import { requireRole } from "../../middlewares/requireRole";
 import {
+  createProjectProgressController,
+  deleteProjectProgressController,
   submitProjectController,
   getActiveGuidesController,
   getStudentsController,
   getGuideProjectsController,
   getMyProjectsController,
   getAdminOverviewController,
+  getProjectProgressController,
   manuallyAssignGuideToProjectController,
   deleteProjectController,
+  reviewProjectProgressController,
 } from "./project.controller";
 
 const projectRoutes = Router();
@@ -22,6 +26,10 @@ projectRoutes.get("/students", requireRole(["student"]), getStudentsController);
 projectRoutes.get("/my-projects", requireRole(["student"]), getMyProjectsController);//student can see their submitted projects
 projectRoutes.get("/guide-projects", requireRole(["guide"]), getGuideProjectsController);//for guide to see allocated projects to them
 projectRoutes.get("/admin-overview", requireRole(["admin"]), getAdminOverviewController);//admin can monitor all project activity
+projectRoutes.get("/:projectId/progress", requireRole(["student", "guide", "admin"]), getProjectProgressController);
+projectRoutes.post("/:projectId/progress", requireRole(["student"]), createProjectProgressController);
+projectRoutes.delete("/progress/:progressId", requireRole(["student"]), deleteProjectProgressController);
+projectRoutes.patch("/progress/:progressId/review", requireRole(["guide"]), reviewProjectProgressController);
 projectRoutes.patch(
   "/:projectId/assign-guide",
   requireRole(["admin"]),

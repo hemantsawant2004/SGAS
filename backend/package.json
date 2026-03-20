@@ -6,7 +6,9 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed": "ts-node-dev --transpile-only ./src/seed/seedUsers.ts"
+    "seed": "ts-node-dev --transpile-only ./src/seed/seedUsers.ts",
+    "seed:admin": "ts-node-dev --transpile-only ./src/seed/seedAdmin.ts",
+    "sync:project-phases": "ts-node-dev --transpile-only ./src/seed/syncProjectPhaseSchema.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

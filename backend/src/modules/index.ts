@@ -2,12 +2,11 @@ import { Guide } from "./Guide/guide.model";
 import { User } from "./user/user.models";
 import { Project } from "./projects/project.model";
 import { ProjectMember } from "./projects/projectMember.model";
+import { ProjectProgress } from "./projects/projectProgress.model";
 
-// Student created project
 User.hasMany(Project, { foreignKey: "studentId" });
 Project.belongsTo(User, { foreignKey: "studentId", as: "creator" });
 
-// Guide relation
 Guide.hasMany(Project, { foreignKey: "preferredGuideId" });
 Project.belongsTo(Guide, {
   foreignKey: "preferredGuideId",
@@ -20,7 +19,24 @@ Project.belongsTo(Guide, {
   as: "assignedGuide",
 });
 
-// Many-to-Many
+Project.hasMany(ProjectProgress, {
+  foreignKey: "projectId",
+  as: "progressUpdates",
+});
+ProjectProgress.belongsTo(Project, {
+  foreignKey: "projectId",
+  as: "project",
+});
+
+User.hasMany(ProjectProgress, {
+  foreignKey: "studentId",
+  as: "submittedProjectProgress",
+});
+ProjectProgress.belongsTo(User, {
+  foreignKey: "studentId",
+  as: "student",
+});
+
 Project.belongsToMany(User, {
   through: ProjectMember,
   foreignKey: "projectId",

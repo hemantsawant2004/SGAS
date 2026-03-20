@@ -1,14 +1,23 @@
 import { Request, Response } from "express";
-import { createProjectSchema, manualAssignGuideSchema } from "./project.dto";
+import {
+  createProjectProgressSchema,
+  createProjectSchema,
+  manualAssignGuideSchema,
+  reviewProjectProgressSchema,
+} from "./project.dto";
 import { getMyProjectsService } from "./project.service";
 import {
+  createProjectProgressService,
   createProjectService,
   deleteProjectService,
   getActiveGuidesService,
   getAdminOverviewService,
+  getProjectProgressService,
   getStudentsService,
   getGuideProjectsService,
   manuallyAssignGuideToProjectService,
+  reviewProjectProgressService,
+  deleteProjectProgressService,
 } from "./project.service";
 
 export const submitProjectController = async (
@@ -79,7 +88,6 @@ export const getGuideProjectsController = async (
   }
 };
 
-
 export const getMyProjectsController = async (req: Request, res: Response) => {
   try {
     const studentId = (req as any).user.id;
@@ -143,3 +151,107 @@ export const deleteProjectController = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const createProjectProgressController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    const payload = createProjectProgressSchema.parse(req.body);
+
+    const progress = await createProjectProgressService(projectId, req.user!, payload);
+
+    res.status(201).json({
+      success: true,
+      message: "Project progress sent to guide successfully.",
+      data: progress,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getProjectProgressController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    const progressUpdates = await getProjectProgressService(projectId, req.user!);
+
+    res.json({
+      success: true,
+      data: progressUpdates,
+    });
+  } catch (error: any) {
+    const status =
+      error.message?.includes("not found") ? 404 : error.message?.includes("allowed") ? 403 : 400;
+
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const reviewProjectProgressController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const progressId = Number(req.params.progressId);
+    const payload = reviewProjectProgressSchema.parse(req.body);
+
+    const progress = await reviewProjectProgressService(progressId, req.user!, payload);
+
+    res.json({
+      success: true,
+      message: "Progress reviewed successfully.",
+      data: progress,
+    });
+  } catch (error: any) {
+    const status =
+      error.message?.includes("not found") ? 404 : error.message?.includes("allowed") ? 403 : 400;
+
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteProjectProgressController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const progressId = Number(req.params.progressId);
+    const result = await deleteProjectProgressService(progressId, req.user!);
+
+    res.json({
+      success: true,
+      message: "Progress deleted successfully.",
+      data: result,
+    });
+  } catch (error: any) {
+    const status =
+      error.message?.includes("not found")
+        ? 404
+        : error.message?.includes("allowed")
+          ? 403
+          : 400;
+
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+

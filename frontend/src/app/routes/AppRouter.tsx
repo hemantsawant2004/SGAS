@@ -20,15 +20,14 @@ import AdminStudentActivityPage from '../../features/admin/pages/AdminStudentAct
 import StudentGuidesPage from '../../features/student/pages/StudentGuidesPage';
 import StudentProjectSubmissionCelebrationPage from '../../features/student/StudentProjectSubmissionCelebrationPage';
 import StudentProjectsPage from '../../features/student/pages/StudentProjectsPage';
+import StudentProjectProgressPage from '../../features/student/pages/StudentProjectProgressPage';
 import GuideAllocatedProjectsPage from '../../features/guide/pages/GuideAllocatedProjectsPage';
-
-
+import GuideProjectProgressPage from '../../features/guide/pages/GuideProjectProgressPage';
 
 const router = createBrowserRouter([
   {
     element: <GuestRoute />,
     children: [{
-      // element: <PublicLayout />,
       children: [
         { path: '/', element: <Login /> },
         { path: '/signup', element: <Signup /> },
@@ -52,19 +51,19 @@ const router = createBrowserRouter([
           {path:"/student/dashboard", element:<StudentDashboard/>},
           {path:"/guide/createprofile", element:<Guide/>},
           { path: "/guide/allocatedprojects", element: <GuideAllocatedProjectsPage /> },
+          { path: "/guide/projects/:projectId/progress", element: <GuideProjectProgressPage /> },
           { path: "/student/guides", element: <StudentGuidesPage /> },
           { path: "/student/projects/new", element: <StudentProjectSubmissionCelebrationPage /> },
           { path: "/student/projects", element: <StudentProjectsPage /> },
+          { path: "/student/projects/:projectId/progress", element: <StudentProjectProgressPage /> },
           { path: "*", element: <NotFound /> },
         ],
       }
     ]
-  
   },
 
 
-  //admin
-    {
+  {
     element: <ProtectedRoutesAdmin />,
     children: [
       {
@@ -79,12 +78,8 @@ const router = createBrowserRouter([
         ],
       }
     ]
-  
   }
-
-]
-
-);
+]);
 export default function AppRouter() {
   return <RouterProvider router={router} />;
 }

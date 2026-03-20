@@ -14,10 +14,10 @@ export default function AdminGuideActivityPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
+        {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
+        {/* <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
           Guide activity
-        </h1>
+        </h1> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

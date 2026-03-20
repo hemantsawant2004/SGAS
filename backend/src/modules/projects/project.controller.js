@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProjectController = exports.manuallyAssignGuideToProjectController = exports.getAdminOverviewController = exports.getMyProjectsController = exports.getGuideProjectsController = exports.getStudentsController = exports.getActiveGuidesController = exports.submitProjectController = void 0;
+exports.deleteProjectProgressController = exports.reviewProjectProgressController = exports.getProjectProgressController = exports.createProjectProgressController = exports.deleteProjectController = exports.manuallyAssignGuideToProjectController = exports.getAdminOverviewController = exports.getMyProjectsController = exports.getGuideProjectsController = exports.getStudentsController = exports.getActiveGuidesController = exports.submitProjectController = void 0;
 const project_dto_1 = require("./project.dto");
 const project_service_1 = require("./project.service");
 const project_service_2 = require("./project.service");
@@ -116,3 +116,83 @@ const deleteProjectController = async (req, res) => {
     }
 };
 exports.deleteProjectController = deleteProjectController;
+const createProjectProgressController = async (req, res) => {
+    try {
+        const projectId = Number(req.params.projectId);
+        const payload = project_dto_1.createProjectProgressSchema.parse(req.body);
+        const progress = await (0, project_service_2.createProjectProgressService)(projectId, req.user, payload);
+        res.status(201).json({
+            success: true,
+            message: "Project progress sent to guide successfully.",
+            data: progress,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+exports.createProjectProgressController = createProjectProgressController;
+const getProjectProgressController = async (req, res) => {
+    try {
+        const projectId = Number(req.params.projectId);
+        const progressUpdates = await (0, project_service_2.getProjectProgressService)(projectId, req.user);
+        res.json({
+            success: true,
+            data: progressUpdates,
+        });
+    }
+    catch (error) {
+        const status = error.message?.includes("not found") ? 404 : error.message?.includes("allowed") ? 403 : 400;
+        res.status(status).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+exports.getProjectProgressController = getProjectProgressController;
+const reviewProjectProgressController = async (req, res) => {
+    try {
+        const progressId = Number(req.params.progressId);
+        const payload = project_dto_1.reviewProjectProgressSchema.parse(req.body);
+        const progress = await (0, project_service_2.reviewProjectProgressService)(progressId, req.user, payload);
+        res.json({
+            success: true,
+            message: "Progress reviewed successfully.",
+            data: progress,
+        });
+    }
+    catch (error) {
+        const status = error.message?.includes("not found") ? 404 : error.message?.includes("allowed") ? 403 : 400;
+        res.status(status).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+exports.reviewProjectProgressController = reviewProjectProgressController;
+const deleteProjectProgressController = async (req, res) => {
+    try {
+        const progressId = Number(req.params.progressId);
+        const result = await (0, project_service_2.deleteProjectProgressService)(progressId, req.user);
+        res.json({
+            success: true,
+            message: "Progress deleted successfully.",
+            data: result,
+        });
+    }
+    catch (error) {
+        const status = error.message?.includes("not found")
+            ? 404
+            : error.message?.includes("allowed")
+                ? 403
+                : 400;
+        res.status(status).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+exports.deleteProjectProgressController = deleteProjectProgressController;

@@ -12,6 +12,10 @@ projectRoutes.get("/students", (0, requireRole_1.requireRole)(["student"]), proj
 projectRoutes.get("/my-projects", (0, requireRole_1.requireRole)(["student"]), project_controller_1.getMyProjectsController); //student can see their submitted projects
 projectRoutes.get("/guide-projects", (0, requireRole_1.requireRole)(["guide"]), project_controller_1.getGuideProjectsController); //for guide to see allocated projects to them
 projectRoutes.get("/admin-overview", (0, requireRole_1.requireRole)(["admin"]), project_controller_1.getAdminOverviewController); //admin can monitor all project activity
+projectRoutes.get("/:projectId/progress", (0, requireRole_1.requireRole)(["student", "guide", "admin"]), project_controller_1.getProjectProgressController);
+projectRoutes.post("/:projectId/progress", (0, requireRole_1.requireRole)(["student"]), project_controller_1.createProjectProgressController);
+projectRoutes.delete("/progress/:progressId", (0, requireRole_1.requireRole)(["student"]), project_controller_1.deleteProjectProgressController);
+projectRoutes.patch("/progress/:progressId/review", (0, requireRole_1.requireRole)(["guide"]), project_controller_1.reviewProjectProgressController);
 projectRoutes.patch("/:projectId/assign-guide", (0, requireRole_1.requireRole)(["admin"]), project_controller_1.manuallyAssignGuideToProjectController);
 projectRoutes.delete("/:projectId", (0, requireRole_1.requireRole)(["admin", "guide"]), project_controller_1.deleteProjectController);
 exports.default = projectRoutes;

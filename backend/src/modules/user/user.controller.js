@@ -145,7 +145,7 @@ async function signup(req, res) {
     if (desiredRole === "admin") {
         return res.status(403).json({ message: "Admin signup is not allowed" });
     }
-    // ✅ Require academic details only for students
+    // Require academic details only for students
     if (desiredRole === "student") {
         if (!studentClass || !division || !rollNumber) {
             return res.status(400).json({

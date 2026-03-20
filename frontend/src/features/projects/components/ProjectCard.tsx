@@ -4,6 +4,7 @@ const guideName = (guide?: { fullName?: string; fullname?: string } | null) =>
   guide?.fullName ?? guide?.fullname ?? "Not assigned";
 
 export default function ProjectCard({ project }: { project: Project }) {
+
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -15,12 +16,12 @@ export default function ProjectCard({ project }: { project: Project }) {
             {project.description}
           </p>
         </div>
-        <div className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+        {/* <div className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
           {project.technology}
-        </div>
+        </div> */}
       </div>
 
-      <div className="mt-5 grid gap-4 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-3">
+      <div className="mt-5 grid gap-4 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Creator</p>
           <p className="mt-1 font-medium text-slate-800 dark:text-white">
@@ -37,6 +38,12 @@ export default function ProjectCard({ project }: { project: Project }) {
           <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Assigned Guide</p>
           <p className="mt-1 font-medium text-slate-800 dark:text-white">
             {guideName(project.assignedGuide)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Project Technology</p>
+          <p className="mt-1 font-medium text-slate-800 dark:text-white">
+            {project.technology}
           </p>
         </div>
       </div>
@@ -58,6 +65,23 @@ export default function ProjectCard({ project }: { project: Project }) {
           )}
         </div>
       </div>
+
+      {/* {phaseStatuses.length ? (
+        <div className="mt-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Phase Status</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {phaseStatuses.map((entry) => (
+              <span
+                key={entry.phase}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium capitalize text-slate-700 dark:border-slate-700 dark:text-slate-200"
+              >
+                {entry.phase}: {entry.status.replace("_", " ")}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null} */}
     </article>
   );
 }
+

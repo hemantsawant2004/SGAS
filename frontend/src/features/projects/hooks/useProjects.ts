@@ -1,11 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createProjectProgress,
+  deleteProjectProgress,
   fetchGuideProjects,
   fetchMyProjects,
   fetchProjectGuides,
+  fetchProjectProgress,
   fetchSelectableStudents,
+  reviewProjectProgress,
   submitProject,
   type CreateProjectPayload,
+  type CreateProjectProgressPayload,
+  type ReviewProjectProgressPayload,
 } from "../services/projects.service";
 
 export function useProjectGuides() {
@@ -47,3 +53,63 @@ export function useGuideProjects() {
     queryFn: fetchGuideProjects,
   });
 }
+
+export function useProjectProgress(projectId: number) {
+  return useQuery({
+    queryKey: ["project-progress", projectId],
+    queryFn: () => fetchProjectProgress(projectId),
+    enabled: Number.isFinite(projectId) && projectId > 0,
+  });
+}
+
+export function useCreateProjectProgress(projectId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateProjectProgressPayload) =>
+      createProjectProgress(projectId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-progress", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["student-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["guide-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    },
+  });
+}
+
+export function useReviewProjectProgress(projectId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      progressId,
+      payload,
+    }: {
+      progressId: number;
+      payload: ReviewProjectProgressPayload;
+    }) => reviewProjectProgress(progressId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-progress", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["student-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["guide-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    },
+  });
+}
+
+export function useDeleteProjectProgress(projectId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (progressId: number) => deleteProjectProgress(progressId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project-progress", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["student-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["guide-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    },
+  });
+}
+
+
+

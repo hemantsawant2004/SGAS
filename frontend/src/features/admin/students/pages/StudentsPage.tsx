@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useDeleteStudent, useStudents, useUpdateStudent } from "../hooks/useStudents";
-import { FaDeleteLeft, FaTrash } from "react-icons/fa6";
-import { FaRemoveFormat, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 
 export default function StudentsPage() {
   const { data: students = [], isLoading, isError } = useStudents();
@@ -10,7 +9,7 @@ export default function StudentsPage() {
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [username, setUsername] = useState("");
-  const [givenName, setGivenName] = useState("");
+  const [givenName] = useState("");
 
   const filteredStudents = useMemo(
     () =>
@@ -32,10 +31,10 @@ export default function StudentsPage() {
     <section className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
+          {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
+          {/* <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
             Manage students
-          </h1>
+          </h1> */}
         </div>
         <input
           value={search}
@@ -140,3 +139,4 @@ function StatCard({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+

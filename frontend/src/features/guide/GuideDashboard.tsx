@@ -4,15 +4,15 @@ import { useAppSelector } from "../../app/hooks";
 
 export default function GuideDashboard() {
   const username = useAppSelector((state) => state.auth.user?.username);
-  const { data: profile } = useMyGuideProfile(username);
+  useMyGuideProfile(username);
   const { data: projects = [] } = useGuideProjects();
 
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Guide</p>
+        {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Guide</p> */}
         <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
-          Guide dashboard
+          Welcome to Dashboard
         </h1>
       </div>
 
@@ -33,3 +33,4 @@ function Card({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
