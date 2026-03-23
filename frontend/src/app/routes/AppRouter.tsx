@@ -23,6 +23,7 @@ import StudentProjectsPage from '../../features/student/pages/StudentProjectsPag
 import StudentProjectProgressPage from '../../features/student/pages/StudentProjectProgressPage';
 import GuideAllocatedProjectsPage from '../../features/guide/pages/GuideAllocatedProjectsPage';
 import GuideProjectProgressPage from '../../features/guide/pages/GuideProjectProgressPage';
+import NotificationsPage from '../../features/notifications/pages/NotificationsPage';
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
           { path: "/student/projects/new", element: <StudentProjectSubmissionCelebrationPage /> },
           { path: "/student/projects", element: <StudentProjectsPage /> },
           { path: "/student/projects/:projectId/progress", element: <StudentProjectProgressPage /> },
+          { path: "/notifications", element: <NotificationsPage /> },
           { path: "*", element: <NotFound /> },
         ],
       }
@@ -75,6 +77,7 @@ const router = createBrowserRouter([
           { path: "/admin/student-activity", element: <AdminStudentActivityPage /> },
           { path: "/admin-guides", element: <GuidesPage /> },
           { path: "/admin/students", element: <StudentsPage /> },
+          { path: "/notifications", element: <NotificationsPage /> },
         ],
       }
     ]

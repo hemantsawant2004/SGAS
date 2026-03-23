@@ -30,6 +30,12 @@ export interface ProjectGuideOption {
   isActive?: boolean;
 }
 
+export interface ProjectFinalSubmissionPdf {
+  fileName: string;
+  fileUrl: string;
+  fileMimeType?: string | null;
+}
+
 export interface Project {
   id: number;
   title: string;
@@ -45,6 +51,7 @@ export interface Project {
   currentPhase?: string;
   currentPhaseStatus?: ProjectPhaseStatus;
   completedAt?: string | null;
+  finalSubmissionPdf?: ProjectFinalSubmissionPdf | null;
 }
 
 export interface CreateProjectPayload {

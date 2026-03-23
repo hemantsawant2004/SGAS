@@ -118,6 +118,7 @@ function GuidesPage() {
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
                 <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Guide</th>
+                <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Experience</th>
                 <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Department & Expertise</th>
                 <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Limit</th>
                 <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Status</th>
@@ -129,15 +130,17 @@ function GuidesPage() {
                 <tr key={guide.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                   {/* Guide Info */}
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
-                        {(guide.fullName ?? guide.fullname ?? "G")[0]}
-                      </div>
                       <div>
                         <p className="font-bold text-slate-900 dark:text-white">{guide.fullName ?? guide.fullname}</p>
-                        <p className="text-xs text-slate-500">{guide.experience} years exp.</p>
                       </div>
-                    </div>
+           
+                  </td>
+
+                  {/* experience */}
+                  <td className="px-6 py-4">
+                      <div>
+                        <p className="text-xs text-slate-800 dark:text-white">{guide.experience} years exp.</p>
+                      </div>
                   </td>
 
                   {/* Dept & Skills */}
@@ -166,7 +169,7 @@ function GuidesPage() {
                           value={guideLimits[guide.id] ?? guide.maxProjects ?? ""}
                           onChange={(e) => setGuideLimits(prev => ({ ...prev, [guide.id]: e.target.value }))}
                         />
-                        <button 
+                        <button
                           onClick={() => setGuideLimit({ id: guide.id, maxProjects: Number(guideLimits[guide.id] ?? guide.maxProjects) })}
                           className="text-xs font-bold text-indigo-600 hover:text-indigo-800"
                         >
@@ -180,9 +183,8 @@ function GuidesPage() {
 
                   {/* Status */}
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                      guide.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-                    }`}>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${guide.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+                      }`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${guide.isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
                       {guide.isActive ? "Active" : "Inactive"}
                     </span>
@@ -193,9 +195,8 @@ function GuidesPage() {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => guide.isActive ? deactivateMutate(guide.id) : reactivateMutate(guide.id)}
-                        className={`text-xs font-bold uppercase tracking-widest hover:underline ${
-                          guide.isActive ? "text-red-500" : "text-emerald-600"
-                        }`}
+                        className={`text-xs font-bold uppercase tracking-widest hover:underline ${guide.isActive ? "text-red-500" : "text-emerald-600"
+                          }`}
                       >
                         {guide.isActive ? "Deactivate" : "Activate"}
                       </button>

@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../hooks';
 import { useNavigate } from 'react-router-dom';
 import { toggleMode } from '../../features/theme/themeSlice';
 import { logout } from '../../features/auth/authSlice';
+import { useNotifications } from '../../features/notifications/hooks/useNotifications';
 
 interface HeaderProps {
   userMenuOpen: boolean
@@ -25,6 +26,7 @@ function Header({
   const theme = useAppSelector((s) => s.theme.mode);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const user = useAppSelector((s) => s.auth.user);
+  const { data: notificationsData } = useNotifications();
 
   const handleLogout = async () => {
     try {
@@ -118,6 +120,28 @@ dark:bg-slate-900/70">
           />
         </svg>
       )}
+    </button>
+
+    <button
+      type="button"
+      onClick={() => navigate("/notifications")}
+      className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:scale-105 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+      aria-label="Notifications"
+    >
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M10 17a2 2 0 0 0 4 0" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+      {notificationsData?.unreadCount ? (
+        <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          {notificationsData.unreadCount > 99 ? "99+" : notificationsData.unreadCount}
+        </span>
+      ) : null}
     </button>
 
     {/* User Dropdown */}

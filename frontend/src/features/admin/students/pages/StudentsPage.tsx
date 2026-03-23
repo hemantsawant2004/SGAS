@@ -45,9 +45,9 @@ export default function StudentsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Total students" value={students.length} />
-        <StatCard label="Visible results" value={filteredStudents.length} />
-        <StatCard label="Editable records" value={students.length} />
+        <StatCard label="Total students" value={students.length}/>
+        {/* <StatCard label="Visible results" value={filteredStudents.length} />
+        <StatCard label="Editable records" value={students.length} /> */}
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">

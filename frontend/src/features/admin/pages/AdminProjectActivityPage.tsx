@@ -4,6 +4,8 @@ import {
   useDeleteProject,
   useManualProjectGuideAssignment,
 } from "../hooks/useAdminOverview";
+import { FaTrash } from "react-icons/fa";
+import { api } from "../../../app/config/axios.config";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-";
@@ -28,6 +30,18 @@ const formatPhaseLabel = (value?: string | null) => {
     .split(" ")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+};
+
+const getFileUrl = (fileUrl?: string | null) => {
+  if (!fileUrl) return null;
+
+  const baseUrl =
+    typeof api.defaults.baseURL === "string" ? api.defaults.baseURL : window.location.origin;
+  const apiRoot = baseUrl.replace(/\/api\/?$/, "");
+
+  return fileUrl.startsWith("http")
+    ? fileUrl
+    : `${apiRoot}${fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`}`;
 };
 
 export default function AdminProjectActivityPage() {
@@ -130,8 +144,9 @@ export default function AdminProjectActivityPage() {
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Preferred Guide</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Allocated Guide</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
+                <th className="px-5 py-4 text-left font-medium text-slate-500">Final Submission</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Pending action</th>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Delete</th>
+                <th className="px-5 py-4 text-left font-medium text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -140,6 +155,10 @@ export default function AdminProjectActivityPage() {
                 const selectedGuideId =
                   selectedGuides[project.id] ??
                   String((project as any).guideId ?? project.assignedGuide?.id ?? project.preferredGuide?.id ?? "");
+                const finalSubmissionUrl = getFileUrl(project.finalSubmissionPdf?.fileUrl);
+                const hasFinalSubmissionPdf =
+                  project.finalSubmissionPdf?.fileMimeType === "application/pdf" &&
+                  Boolean(finalSubmissionUrl);
 
                 return (
                 <tr key={project.id}>
@@ -199,6 +218,21 @@ export default function AdminProjectActivityPage() {
                   </td>
 
                   <td className="px-5 py-4 align-top">
+                    {hasFinalSubmissionPdf && finalSubmissionUrl ? (
+                      <a
+                        href={finalSubmissionUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        View PDF
+                      </a>
+                    ) : (
+                      <span className="text-sm text-slate-400 dark:text-slate-500">-</span>
+                    )}
+                  </td>
+
+                  <td className="px-5 py-4 align-top">
                     {isPending ? (
                       <div className="flex min-w-[240px] flex-col gap-2">
                         <select
@@ -244,9 +278,9 @@ export default function AdminProjectActivityPage() {
                       type="button"
                       disabled={isDeleting}
                       onClick={() => deleteProject(project.id)}
-                      className="rounded-2xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30"
+                      className="px-4 py-2 text-sm font-medium text-red-600 transition disabled:cursor-not-allowed disabled:opacity-60 dark:text-red-300"
                     >
-                      {isDeleting ? "Deleting..." : "Delete"}
+                      {/* {isDeleting ? "Deleting..." : "Delete"} */}<FaTrash/>
                     </button>
                   </td>
 

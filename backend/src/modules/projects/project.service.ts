@@ -1,11 +1,15 @@
 import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sequelize } from "../../config/database";
 import { AuthUser } from "../../types/express";
 import { getGuideProfileByUser } from "../Guide/guide.service";
 import { Guide } from "../Guide/guide.model";
+import {
+  createAdminNotifications,
+  createNotifications,
+} from "../notifications/notification.service";
 import { User } from "../user/user.models";
 import {
   CreateProjectDto,
@@ -261,6 +265,20 @@ const getProjectWithRelations = async (
     ],
   });
 
+const getProjectStudentRecipientIds = async (
+  projectId: number,
+  creatorId: number,
+  transaction?: Transaction
+) => {
+  const memberships = await ProjectMember.findAll({
+    where: { projectId },
+    attributes: ["studentId"],
+    transaction,
+  });
+
+  return [...new Set([creatorId, ...memberships.map((entry) => entry.studentId)])];
+};
+
 const canStudentAccessProject = async (
   projectId: number,
   studentId: number,
@@ -491,6 +509,45 @@ export const createProjectService = async (
     const createdProject = await getProjectWithRelations(project.id, transaction);
     const projectWithRelations = createdProject ?? project;
 
+    await createAdminNotifications([
+      {
+        projectId: project.id,
+        type: "project_created",
+        title: "New project added",
+        message: `${payload.title} was submitted for guide allocation.`,
+      },
+    ]);
+
+    if (allocationResult.allocationIssue) {
+      await createAdminNotifications([
+        {
+          projectId: project.id,
+          type: "allocation_review_required",
+          title: "Guide allocation needs admin review",
+          message: `${payload.title}: ${allocationResult.allocationIssue.message}`,
+        },
+      ]);
+    }
+
+    if ((project as any).guideId) {
+      const assignedGuide = await Guide.findByPk((project as any).guideId, {
+        attributes: ["userId"],
+        transaction,
+      });
+
+      if ((assignedGuide as any)?.userId) {
+        await createNotifications([
+          {
+            userId: (assignedGuide as any).userId,
+            projectId: project.id,
+            type: "project_assigned",
+            title: "New project assigned",
+            message: `${payload.title} has been allocated to you for review.`,
+          },
+        ]);
+      }
+    }
+
     if (allocationResult.allocationIssue) {
       return enrichProjectAllocationState(projectWithRelations, transaction);
     }
@@ -541,8 +598,19 @@ export const getGuideProjectsService = async (authUser: AuthUser) => {
 };
 
 export const getMyProjectsService = async (studentId: number) => {
-  const projects = await Project.findAll({
+  const memberships = await ProjectMember.findAll({
     where: { studentId },
+    attributes: ["projectId"],
+  });
+
+  const memberProjectIds = memberships.map((entry) => entry.projectId);
+  const projects = await Project.findAll({
+    where: {
+      [Op.or]: [
+        { studentId },
+        ...(memberProjectIds.length ? [{ id: { [Op.in]: memberProjectIds } }] : []),
+      ],
+    },
     include: [
       { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
       { association: "preferredGuide", attributes: ["id", "fullName", "isActive"] },
@@ -591,10 +659,26 @@ export const getAdminOverviewService = async () => {
 
 
   const latestCompletedProgressByProjectId = new Map<number, string>();
+  const finalSubmissionPdfByProjectId = new Map<
+    number,
+    {
+      fileName: string;
+      fileUrl: string;
+      fileMimeType: string | null;
+    }
+  >();
   const completedProgressUpdates = await ProjectProgress.findAll({
     where: { remarkStatus: "completed" },
-    attributes: ["projectId", "reviewedAt", "updatedAt"],
-    order: [["reviewedAt", "DESC"], ["updatedAt", "DESC"]],
+    attributes: [
+      "projectId",
+      "phase",
+      "reviewedAt",
+      "updatedAt",
+      "fileName",
+      "fileUrl",
+      "fileMimeType",
+    ],
+    order: [["reviewedAt", "DESC"], ["updatedAt", "DESC"], ["id", "DESC"]],
   });
 
   for (const progress of completedProgressUpdates) {
@@ -603,6 +687,19 @@ export const getAdminOverviewService = async () => {
         progress.projectId,
         (((progress.reviewedAt ?? (progress as any).updatedAt) as Date)).toISOString()
       );
+    }
+
+    if (
+      progress.phase === "final submission" &&
+      progress.fileUrl &&
+      progress.fileName &&
+      !finalSubmissionPdfByProjectId.has(progress.projectId)
+    ) {
+      finalSubmissionPdfByProjectId.set(progress.projectId, {
+        fileName: progress.fileName,
+        fileUrl: progress.fileUrl,
+        fileMimeType: progress.fileMimeType ?? null,
+      });
     }
   }
   const students = await User.findAll({
@@ -669,6 +766,10 @@ export const getAdminOverviewService = async () => {
         completedAt:
           statusSummary.currentPhaseStatus === "completed"
             ? latestCompletedProgressByProjectId.get(enrichedProject.id) ?? null
+            : null,
+        finalSubmissionPdf:
+          statusSummary.currentPhaseStatus === "completed"
+            ? finalSubmissionPdfByProjectId.get(enrichedProject.id) ?? null
             : null,
       };
     })
@@ -797,6 +898,34 @@ export const manuallyAssignGuideToProjectService = async (
 
     const updatedProject = await getProjectWithRelations(project.id, transaction);
 
+    if ((guide as any).userId) {
+      await createNotifications([
+        {
+          userId: (guide as any).userId,
+          projectId: project.id,
+          type: "project_assigned",
+          title: "New project assigned",
+          message: `${(project as any).title} has been manually assigned to you by admin.`,
+        },
+      ]);
+    }
+
+    const studentRecipients = await getProjectStudentRecipientIds(
+      project.id,
+      (project as any).studentId,
+      transaction
+    );
+
+    await createNotifications(
+      studentRecipients.map((userId) => ({
+        userId,
+        projectId: project.id,
+        type: "project_assigned" as const,
+        title: "Guide allocated to your project",
+        message: `${(guide as any).fullName} has been assigned by admin to ${(project as any).title}.`,
+      }))
+    );
+
     return enrichProjectAllocationState(updatedProject ?? project, transaction);
   });
 };
@@ -817,7 +946,7 @@ export const createProjectProgressService = async (
       }
 
       const assignedGuide = await Guide.findByPk((project as any).guideId, {
-        attributes: ["id", "isActive"],
+        attributes: ["id", "isActive", "userId"],
         transaction,
       });
 
@@ -844,6 +973,25 @@ export const createProjectProgressService = async (
 
       await setProjectPhaseStatus(project, payload.phase, "in_progress", transaction);
 
+      const student = await User.findByPk(authUser.id, {
+        attributes: ["given_name", "username"],
+        transaction,
+      });
+      const studentName =
+        (student?.get("given_name") as string | null) ||
+        student?.get("username") ||
+        authUser.username;
+
+      await createNotifications([
+        {
+          userId: authUser.id,
+          projectId: project.id,
+          type: "progress_submitted",
+          title: "Progress submitted",
+          message: `Your ${payload.phase} update for ${(project as any).title} was sent to the guide.`,
+        },
+      ]);
+
       if (existingNeedsChangesProgress) {
         const previousFileUrl = existingNeedsChangesProgress.fileUrl;
 
@@ -857,6 +1005,19 @@ export const createProjectProgressService = async (
 
         if (attachment.fileUrl && previousFileUrl && previousFileUrl !== attachment.fileUrl) {
           await removeStoredFile(previousFileUrl);
+        }
+
+        if ((assignedGuide as any).userId) {
+          await createNotifications([
+            {
+              userId: (assignedGuide as any).userId,
+              projectId: project.id,
+              progressId: existingNeedsChangesProgress.id,
+              type: "progress_submitted",
+              title: "Progress resubmitted",
+              message: `${studentName} resubmitted ${payload.phase} for ${(project as any).title}.`,
+            },
+          ]);
         }
 
         return ProjectProgress.findByPk(existingNeedsChangesProgress.id, {
@@ -878,6 +1039,19 @@ export const createProjectProgressService = async (
         },
         { transaction }
       );
+
+      if ((assignedGuide as any).userId) {
+        await createNotifications([
+          {
+            userId: (assignedGuide as any).userId,
+            projectId: project.id,
+            progressId: progress.id,
+            type: "progress_submitted",
+            title: "New progress submitted",
+            message: `${studentName} submitted ${payload.phase} for ${(project as any).title}.`,
+          },
+        ]);
+      }
 
       return ProjectProgress.findByPk(progress.id, {
         transaction,
@@ -926,7 +1100,11 @@ export const reviewProjectProgressService = async (
       throw new Error("Project progress not found.");
     }
 
-    const { project } = await assertGuideOwnsProject(progress.projectId, authUser, transaction);
+    const { project, guide } = await assertGuideOwnsProject(
+      progress.projectId,
+      authUser,
+      transaction
+    );
 
     progress.guideReply = payload.guideReply;
     progress.remarkStatus = payload.remarkStatus;
@@ -938,6 +1116,28 @@ export const reviewProjectProgressService = async (
       progress.phase,
       payload.remarkStatus === "completed" ? "completed" : "in_progress",
       transaction
+    );
+
+    const recipients = await getProjectStudentRecipientIds(
+      project.id,
+      (project as any).studentId,
+      transaction
+    );
+    const guideName = ((guide as any).fullName as string | null) || authUser.username;
+    const reviewLabel =
+      payload.remarkStatus === "completed" ? "completed" : "needs changes";
+
+    await createNotifications(
+      recipients
+        .filter((userId) => userId !== authUser.id)
+        .map((userId) => ({
+          userId,
+          projectId: project.id,
+          progressId: progress.id,
+          type: "progress_reviewed" as const,
+          title: "Guide review posted",
+          message: `${guideName} marked ${progress.phase} as ${reviewLabel} for ${(project as any).title}.`,
+        }))
     );
 
     return ProjectProgress.findByPk(progress.id, {

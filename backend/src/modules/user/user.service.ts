@@ -1,6 +1,7 @@
 import { User } from "./user.models";
 import type { CreateUserInput } from "./user.dto";
 import bcrypt from "bcrypt";
+import { createAdminNotifications } from "../notifications/notification.service";
 
 export async function findUserByUsername(username: string) {
   console.log("inside find user by username", username);
@@ -51,7 +52,7 @@ export async function createPreUser(data: CreateUserInput) {
     }
   }
 
-  return User.create({
+  const user = await User.create({
     username: data.username,
     given_name: data.given_name,
     role: data.role,
@@ -60,6 +61,18 @@ export async function createPreUser(data: CreateUserInput) {
     rollNumber: data.role === "student" ? data.rollNumber : null,
     password: null,
   });
+
+  if (data.role === "student") {
+    await createAdminNotifications([
+      {
+        type: "student_created",
+        title: "New student added",
+        message: `${data.username} was added as a student account.`,
+      },
+    ]);
+  }
+
+  return user;
 }
 
 export async function updateUserPassword(

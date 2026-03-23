@@ -25,13 +25,13 @@ export default function AdminDashboard() {
 
       <div className="grid gap-3 md:grid-cols-3">
         <DashboardCard label="Total projects" value={data.summary.totalProjects} />
-        <DashboardCard label="Allocated" value={data.summary.allocatedProjects} />
-        <DashboardCard label="Unallocated" value={data.summary.unallocatedProjects} />
+        <DashboardCard label="Allocated Projects" value={data.summary.allocatedProjects} />
+        <DashboardCard label="Unallocated Projects" value={data.summary.unallocatedProjects} />
         <DashboardCard label="Active guides" value={data.summary.totalGuideActivities} />
-        <DashboardCard label="Active students" value={data.summary.totalStudentActivities} />
+        <DashboardCard label="Total students" value={data.summary.totalStudentActivities} />
       </div>
 
-      {data.allocationAlerts.length ? (
+      {/* {data.allocationAlerts.length ? (
         <div className="rounded-3xl border border-amber-300 bg-amber-50 p-6 text-amber-950 shadow-sm dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
           <h2 className="text-lg font-semibold">Allocation attention required</h2>
           <p className="mt-2 text-sm leading-6">
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
             because no guide could be auto-allocated.
           </p>
         </div>
-      ) : null}
+      ) : null} */}
 
       {/* <div className="grid gap-4 lg:grid-cols-3">
         <InfoCard

@@ -2,6 +2,7 @@ import { Guide } from "./guide.model";
 import { CreateGuideDto } from "./guide.dto";
 import { AuthUser } from "../../types/express";
 import { Project } from "../projects/project.model";
+import { createAdminNotifications } from "../notifications/notification.service";
 
 export const CreateGuideProfile = async (
   data: CreateGuideDto,
@@ -18,7 +19,17 @@ export const CreateGuideProfile = async (
     throw new Error("Guide already exists with this email");
   }
 
-  return await Guide.create({ ...data, userId: user.id, username: user.username });
+  const guide = await Guide.create({ ...data, userId: user.id, username: user.username });
+
+  await createAdminNotifications([
+    {
+      type: "guide_created",
+      title: "New guide added",
+      message: `${data.fullName} created a guide profile.`,
+    },
+  ]);
+
+  return guide;
 };
 
 export const getGuideProfileByUser = async (user: AuthUser) => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useStudentGuides } from "./hooks/useStudentGuides";
 import { useMyProjects } from "../projects/hooks/useProjects";
 
@@ -14,24 +14,18 @@ export default function StudentDashboard() {
         .join("|"),
     [allocatedProjects]
   );
-  const [showAllocationNotice, setShowAllocationNotice] = useState(false);
 
   useEffect(() => {
     if (!allocationNoticeKey) {
-      setShowAllocationNotice(false);
       return;
     }
 
     const storageKey = `student-allocation-notice:${allocationNoticeKey}`;
     const hasSeenNotice = window.sessionStorage.getItem(storageKey) === "seen";
 
-    if (hasSeenNotice) {
-      setShowAllocationNotice(false);
-      return;
+    if (!hasSeenNotice) {
+      window.sessionStorage.setItem(storageKey, "seen");
     }
-
-    setShowAllocationNotice(true);
-    window.sessionStorage.setItem(storageKey, "seen");
   }, [allocationNoticeKey]);
 
   return (
@@ -43,11 +37,11 @@ export default function StudentDashboard() {
         </h1>
       </div>
 
-      {showAllocationNotice ? (
+      {/* {showAllocationNotice ? (
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
           Your project has been allocated to a guide. Check your project page to view the assigned guide.
         </div>
-      ) : null}
+      ) : null} */}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card label="Available guides" value={String(guides.length)} />

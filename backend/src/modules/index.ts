@@ -3,6 +3,7 @@ import { User } from "./user/user.models";
 import { Project } from "./projects/project.model";
 import { ProjectMember } from "./projects/projectMember.model";
 import { ProjectProgress } from "./projects/projectProgress.model";
+import { Notification } from "./notifications/notification.model";
 
 User.hasMany(Project, { foreignKey: "studentId" });
 Project.belongsTo(User, { foreignKey: "studentId", as: "creator" });
@@ -47,4 +48,14 @@ User.belongsToMany(Project, {
   through: ProjectMember,
   foreignKey: "studentId",
   as: "joinedProjects",
+});
+
+User.hasMany(Notification, {
+  foreignKey: "userId",
+  as: "notifications",
+});
+
+Notification.belongsTo(User, {
+  foreignKey: "userId",
+  as: "recipient",
 });

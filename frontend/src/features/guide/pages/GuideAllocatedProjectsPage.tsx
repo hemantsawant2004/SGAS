@@ -56,24 +56,29 @@ export default function GuideAllocatedProjectsPage() {
                         <td className="px-5 py-4">
                           <div>
                             <p className="font-semibold text-slate-900 dark:text-white">{project.title}</p>
-                            <p className="mt-1 max-w-md text-xs leading-5 text-slate-500 dark:text-slate-400">
+                            {/* <p className="mt-1 max-w-md text-xs leading-5 text-slate-500 dark:text-slate-400">
                               {project.description}
-                            </p>
+                            </p> */}
                           </div>
                         </td>
+
                         <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                           {project.creator?.given_name || project.creator?.username || "-"}
                         </td>
+
                         <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                          <p>{project.members?.length ? `${project.members.length} member(s)` : "Solo"}</p>
+                          {/* <p>{project.members?.length ? `${project.members.length} member(s)` : "Solo"}</p> */}
                           <p className="mt-1 max-w-xs text-xs text-slate-500 dark:text-slate-400">{memberNames}</p>
                         </td>
+
                         <td className="px-5 py-4 text-slate-600 dark:text-slate-300">{project.technology}</td>
+
                         <td className="px-5 py-4">
                           <span className="inline-flex rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:text-slate-300">
                             {completedCount}/{totalPhases} completed
                           </span>
                         </td>
+
                         <td className="px-5 py-4">
                           <div className="flex flex-wrap gap-2">
                             <Link
@@ -92,6 +97,7 @@ export default function GuideAllocatedProjectsPage() {
                             </button>
                           </div>
                         </td>
+
                       </tr>
                     );
                   })}

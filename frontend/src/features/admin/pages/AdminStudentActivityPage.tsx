@@ -54,8 +54,9 @@ export default function AdminStudentActivityPage() {
             <tr>
               <th className="px-5 py-4 text-left font-medium text-slate-500">Student</th>
               <th className="px-5 py-4 text-left font-medium text-slate-500">Class</th>
-              <th className="px-5 py-4 text-left font-medium text-slate-500">Roll</th>
-              <th className="px-5 py-4 text-left font-medium text-slate-500">Projects</th>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Division</th>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Roll Number</th>
+              {/* <th className="px-5 py-4 text-left font-medium text-slate-500">Projects</th> */}
               <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
             </tr>
           </thead>
@@ -66,28 +67,36 @@ export default function AdminStudentActivityPage() {
                   <p className="font-medium text-slate-800 dark:text-white">
                     {student.fullName || student.username}
                   </p>
-                  <p className="text-xs text-slate-500">{student.username}</p>
+                  {/* <p className="text-xs text-slate-500">{student.username}</p> */}
                 </td>
+
                 <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                  {student.class || "-"} / {student.division || "-"}
+                  {student.class || "-"}
                 </td>
+
+                <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                {student.division || "-"}
+                </td>
+
                 <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
                   {student.rollNumber || "-"}
                 </td>
-                <td className="px-5 py-4 text-slate-700 dark:text-slate-200">
+
+                {/* <td className="px-5 py-4 text-slate-700 dark:text-slate-200">
                   {student.projectCount}
-                </td>
+                </td> */}
+
                 <td className="px-5 py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      student.isAssigned
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${student.isAssigned
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-slate-100 text-slate-700"
-                    }`}
+                      }`}
                   >
                     {student.isAssigned ? "Active in project" : "No project"}
                   </span>
                 </td>
+
               </tr>
             ))}
           </tbody>
