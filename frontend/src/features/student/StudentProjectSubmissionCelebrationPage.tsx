@@ -25,6 +25,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
       | { message?: string }
       | null
       | undefined;
+    const projectCode = submittedProject.projectCode?.trim() || "Code pending";
     const assignedGuideName =
       submittedProject.assignedGuide?.fullName ??
       submittedProject.assignedGuide?.fullname ??
@@ -52,6 +53,10 @@ export default function StudentProjectSubmissionCelebrationPage() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
             Your project <span className="font-semibold text-slate-900 dark:text-white">{submittedProject.title}</span> has been submitted successfully.
+            Your tracking code is - <br/>{" "}
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {projectCode}
+            </span>.
             The currently assigned guide is{" "}
             <span className="font-semibold text-emerald-700 dark:text-emerald-400">
               {assignedGuideName}
@@ -66,6 +71,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
 
           <div className="mt-8 grid gap-4 text-left md:grid-cols-3">
             <SummaryCard label="Project" value={submittedProject.title} />
+            {/* <SummaryCard label="Project Code" value={projectCode} /> */}
             <SummaryCard label="Technology" value={submittedProject.technology} />
             <SummaryCard label="Assigned Guide" value={assignedGuideName} />
           </div>
@@ -77,7 +83,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
               onClick={() => (window.location.href = "/student/projects")}
               className="rounded-2xl bg-emerald-500 px-5 py-3 font-medium text-white transition hover:bg-emerald-400"
             >
-              View my projects
+              View my project
             </button>
           </div>
         </div>

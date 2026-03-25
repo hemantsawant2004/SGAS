@@ -32,6 +32,14 @@ const PROJECT_ALLOCATION_ISSUE_MESSAGES = {
     "No guide is currently available for allocation. Admin review is required.",
 } as const;
 
+const buildProjectCode = (projectId: number) => {
+  const year = new Date().getFullYear();
+  const idSegment = String(projectId).padStart(4, "0");
+  const randomSegment = randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+
+  return `VPIMSR-${year}-${idSegment}-${randomSegment}`;
+};
+
 const normalizeAcademicValue = (value: string | null) => {
   if (!value) return "";
   if (!NORMALIZE_CLASS_DIVISION) return value;
@@ -265,6 +273,20 @@ const getProjectWithRelations = async (
     ],
   });
 
+const assignProjectCodeIfMissing = async (
+  project: Project,
+  transaction?: Transaction
+) => {
+  if ((project as any).projectCode) {
+    return project;
+  }
+
+  (project as any).projectCode = buildProjectCode(project.id);
+  await project.save({ transaction });
+
+  return project;
+};
+
 const getProjectStudentRecipientIds = async (
   projectId: number,
   creatorId: number,
@@ -346,6 +368,7 @@ const getProjectStatusSummary = (project: any) => {
     currentPhaseStatus: firstOpenPhase.status,
   };
 };
+
 const enrichProjectAllocationState = async (
   project: any,
   transaction?: Transaction
@@ -498,6 +521,7 @@ export const createProjectService = async (
     );
 
     const allocationResult = await autoAssignGuideToProject(project.id, transaction);
+    await assignProjectCodeIfMissing(project, transaction);
 
     const membersData = memberIds.map((memberId) => ({
       projectId: project.id,
@@ -807,6 +831,20 @@ export const getAdminOverviewService = async () => {
   };
 };
 
+export const syncProjectCodesService = async () => {
+  await Project.sync({ alter: true });
+
+  const projects = await Project.findAll({
+    where: {
+      projectCode: null,
+    },
+  });
+
+  for (const project of projects) {
+    await assignProjectCodeIfMissing(project);
+  }
+};
+
 export const deleteProjectService = async (
   projectId: number,
   authUser: AuthUser
@@ -895,6 +933,7 @@ export const manuallyAssignGuideToProjectService = async (
 
     (project as any).guideId = guide.id;
     await project.save({ transaction });
+    await assignProjectCodeIfMissing(project, transaction);
 
     const updatedProject = await getProjectWithRelations(project.id, transaction);
 
@@ -1086,6 +1125,44 @@ export const getProjectProgressService = async (
     include: [{ association: "student", attributes: ["id", "username", "given_name"] }],
     order: [["updatedAt", "DESC"], ["createdAt", "DESC"]],
   });
+};
+
+export const getProjectTrackingByCodeService = async (projectCode: string) => {
+  const normalizedCode = projectCode.trim().toUpperCase();
+
+  if (!normalizedCode) {
+    throw new Error("Project code is required.");
+  }
+
+  const project = await Project.findOne({
+    where: { projectCode: normalizedCode },
+    include: [
+      { association: "creator", attributes: ["id", "username", "given_name", "class", "division"] },
+      { association: "preferredGuide", attributes: ["id", "fullName", "isActive"] },
+      { association: "assignedGuide", attributes: ["id", "fullName", "isActive"] },
+      {
+        association: "members",
+        attributes: ["id", "username", "given_name", "class", "division"],
+        through: { attributes: [] },
+      },
+    ],
+  });
+
+  if (!project) {
+    throw new Error("Project not found for the provided code.");
+  }
+
+  const enrichedProject = await enrichProjectAllocationState(project);
+  const statusSummary = getProjectStatusSummary(enrichedProject);
+
+  return {
+    project: {
+      ...enrichedProject,
+      currentPhase: statusSummary.currentPhase,
+      currentPhaseStatus: statusSummary.currentPhaseStatus,
+    },
+    progressUpdates: [],
+  };
 };
 
 export const reviewProjectProgressService = async (

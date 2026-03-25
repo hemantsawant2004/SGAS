@@ -13,6 +13,7 @@ import {
   getActiveGuidesService,
   getAdminOverviewService,
   getProjectProgressService,
+  getProjectTrackingByCodeService,
   getStudentsService,
   getGuideProjectsService,
   manuallyAssignGuideToProjectService,
@@ -190,6 +191,28 @@ export const getProjectProgressController = async (
   } catch (error: any) {
     const status =
       error.message?.includes("not found") ? 404 : error.message?.includes("allowed") ? 403 : 400;
+
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getProjectTrackingByCodeController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const projectCode = String(req.params.projectCode ?? "");
+    const tracking = await getProjectTrackingByCodeService(projectCode);
+
+    res.json({
+      success: true,
+      data: tracking,
+    });
+  } catch (error: any) {
+    const status = error.message?.includes("not found") ? 404 : 400;
 
     res.status(status).json({
       success: false,

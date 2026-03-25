@@ -61,9 +61,10 @@ export default function AdminProjectActivityPage() {
         project.preferredGuide?.fullName ||
         project.preferredGuide?.fullname ||
         "";
+      const code = project.projectCode || "";
       const status = `${project.currentPhase || ""} ${project.currentPhaseStatus || ""}`;
 
-      return `${project.title} ${creator} ${guide} ${project.technology} ${status}`
+      return `${project.title} ${creator} ${guide} ${project.technology} ${code} ${status}`
         .toLowerCase()
         .includes(search.toLowerCase());
     });
@@ -139,6 +140,7 @@ export default function AdminProjectActivityPage() {
             <thead className="bg-slate-50 dark:bg-slate-950">
               <tr>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Project</th>
+                <th className="px-5 py-4 text-left font-medium text-slate-500">Project Code</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Technology</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Student Team</th>
                 <th className="px-5 py-4 text-left font-medium text-slate-500">Preferred Guide</th>
@@ -165,6 +167,10 @@ export default function AdminProjectActivityPage() {
 
                   <td className="px-5 py-4 align-top">
                     <p className="font-medium text-slate-800 dark:text-white">{project.title}</p>
+                  </td>
+
+                  <td className="px-5 py-4 align-top text-slate-600 dark:text-slate-300">
+                    {project.projectCode || "-"}
                   </td>
 
                   <td className="px-5 py-4 align-top text-slate-600 dark:text-slate-300">
@@ -228,7 +234,7 @@ export default function AdminProjectActivityPage() {
                         View PDF
                       </a>
                     ) : (
-                      <span className="text-sm text-slate-400 dark:text-slate-500">-</span>
+                      <span className="text-sm text-slate-400 dark:text-slate-500">Pending</span>
                     )}
                   </td>
 

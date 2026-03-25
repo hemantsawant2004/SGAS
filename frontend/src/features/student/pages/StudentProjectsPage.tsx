@@ -32,6 +32,27 @@ export default function StudentProjectsPage() {
             return (
               <div key={project.id} className="rounded-[28px] bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
                 <ProjectCard project={project} />
+                {/* <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900/60 dark:bg-amber-950/20">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">
+                      Project Code
+                    </p>
+                    <p className="mt-1 text-lg font-bold tracking-[0.12em] text-slate-900 dark:text-white">
+                      {project.projectCode || "Generating..."}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Use this code to track your project progress in view-only mode.
+                    </p>
+                  </div>
+                  {project.projectCode ? (
+                    <Link
+                      to={`/projects/track/${project.projectCode}`}
+                      className="inline-flex items-center justify-center rounded-2xl border border-amber-300 px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
+                    >
+                      Open Tracker
+                    </Link>
+                  ) : null}
+                </div> */}
                 <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-950/40">
                   <div>
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">Progress Submission</p>
@@ -40,9 +61,9 @@ export default function StudentProjectsPage() {
                         ? "Congratulations ! Your Project is Completed."
                         : isAssignedGuideInactive
                           ? `${assignedGuideName} is inactive right now. Progress submission is disabled until admin reactivates your guide.`
-                        : assignedGuideName
-                          ? `Send your report progress and attachments to ${assignedGuideName}.`
-                          : "Submit progress after a guide is allocated to this project."}
+                          : assignedGuideName
+                            ? `Send your report progress and attachments to ${assignedGuideName}.`
+                            : "Submit progress after a guide is allocated to this project."}
                     </p>
                   </div>
                   <Link
@@ -66,4 +87,3 @@ export default function StudentProjectsPage() {
     </section>
   );
 }
-

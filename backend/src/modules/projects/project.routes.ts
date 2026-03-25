@@ -11,6 +11,7 @@ import {
   getMyProjectsController,
   getAdminOverviewController,
   getProjectProgressController,
+  getProjectTrackingByCodeController,
   manuallyAssignGuideToProjectController,
   deleteProjectController,
   reviewProjectProgressController,
@@ -26,6 +27,7 @@ projectRoutes.get("/students", requireRole(["student"]), getStudentsController);
 projectRoutes.get("/my-projects", requireRole(["student"]), getMyProjectsController);//student can see their submitted projects
 projectRoutes.get("/guide-projects", requireRole(["guide"]), getGuideProjectsController);//for guide to see allocated projects to them
 projectRoutes.get("/admin-overview", requireRole(["admin"]), getAdminOverviewController);//admin can monitor all project activity
+projectRoutes.get("/track/:projectCode", requireRole(["student", "guide", "admin"]), getProjectTrackingByCodeController);
 projectRoutes.get("/:projectId/progress", requireRole(["student", "guide", "admin"]), getProjectProgressController);
 projectRoutes.post("/:projectId/progress", requireRole(["student"]), createProjectProgressController);
 projectRoutes.delete("/progress/:progressId", requireRole(["student"]), deleteProjectProgressController);

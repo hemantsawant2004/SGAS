@@ -38,6 +38,7 @@ export interface ProjectFinalSubmissionPdf {
 
 export interface Project {
   id: number;
+  projectCode?: string | null;
   title: string;
   description: string;
   technology: string;
@@ -78,6 +79,11 @@ export interface ProjectProgress {
   fileMimeType?: string | null;
   fileSize?: number | null;
   student?: ProjectPerson;
+}
+
+export interface ProjectTrackingResponse {
+  project: Project;
+  progressUpdates: ProjectProgress[];
 }
 
 export interface CreateProjectProgressPayload {
@@ -132,6 +138,13 @@ export async function fetchProjectProgress(projectId: number): Promise<ProjectPr
   return data?.data ?? [];
 }
 
+export async function fetchProjectTrackingByCode(
+  projectCode: string
+): Promise<ProjectTrackingResponse> {
+  const { data } = await api.get(`/projects/track/${encodeURIComponent(projectCode.trim())}`);
+  return data?.data;
+}
+
 export async function createProjectProgress(
   projectId: number,
   payload: CreateProjectProgressPayload
@@ -152,7 +165,3 @@ export async function reviewProjectProgress(
   const { data } = await api.patch(`/projects/progress/${progressId}/review`, payload);
   return data?.data;
 }
-
-
-
-

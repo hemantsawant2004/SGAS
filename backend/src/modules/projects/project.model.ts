@@ -3,6 +3,7 @@ import { sequelize } from "../../config/database";
 
 interface ProjectAttributes {
   id: number;
+  projectCode: string | null;
   title: string;
   description: string;
   technology: string;
@@ -16,13 +17,17 @@ interface ProjectAttributes {
 }
 
 interface ProjectCreationAttributes
-  extends Optional<ProjectAttributes, "id" | "preferredGuideId" | "guideId" | "phaseStatuses"> {}
+  extends Optional<
+    ProjectAttributes,
+    "id" | "projectCode" | "preferredGuideId" | "guideId" | "phaseStatuses"
+  > {}
 
 export class Project
   extends Model<ProjectAttributes, ProjectCreationAttributes>
   implements ProjectAttributes
 {
   public id!: number;
+  public projectCode!: string | null;
   public title!: string;
   public description!: string;
   public technology!: string;
@@ -53,6 +58,11 @@ export const buildDefaultProjectPhaseStatuses = () =>
 Project.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    projectCode: {
+      type: DataTypes.STRING(32),
+      allowNull: true,
+      unique: true,
+    },
     title: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
     technology: { type: DataTypes.STRING, allowNull: false },

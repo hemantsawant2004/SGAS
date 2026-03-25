@@ -4,6 +4,7 @@ import app from "./app";
 import { sequelize } from "./config/database";
 import "./modules";
 import { syncNotificationTable } from "./modules/notifications/notification.service";
+import { syncProjectCodesService } from "./modules/projects/project.service";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
@@ -11,6 +12,7 @@ async function start() {
   try {
     await sequelize.authenticate();
     await syncNotificationTable();
+    await syncProjectCodesService();
     console.log("Database connected");
 
     app.listen(PORT, () => {

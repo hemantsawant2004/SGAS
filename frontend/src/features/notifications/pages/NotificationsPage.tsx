@@ -58,15 +58,16 @@ export default function NotificationsPage() {
   return (
     <section className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-           <div className="ml-5 mb-5">
-        <BackButton/>
-        </div>
-        <div>
+        <div className="ml-5 mb-5 flex gap-6">
+          <BackButton />
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Notifications</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          {/* <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Recent project updates for your account.
-          </p>
+          </p> */}
         </div>
+        {/* <div>
+      
+        </div> */}
         <button
           type="button"
           disabled={isMarkingAll || !data?.unreadCount}
@@ -85,18 +86,17 @@ export default function NotificationsPage() {
             return (
               <article
                 key={notification.id}
-                className={`rounded-3xl border p-5 shadow-sm transition ${
-                  notification.isRead
+                className={`rounded-3xl border p-5 shadow-sm transition ${notification.isRead
                     ? "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
                     : "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                      {/* <span className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-slate-700 dark:text-slate-300">
                         {notificationTypeLabel[notification.type] ?? "Update"}
-                      </span>
+                      </span> */}
                       {!notification.isRead ? (
                         <span className="rounded-full bg-amber-500 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
                           New

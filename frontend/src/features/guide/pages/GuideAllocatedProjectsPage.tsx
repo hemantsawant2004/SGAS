@@ -39,6 +39,7 @@ export default function GuideAllocatedProjectsPage() {
                     <th className="px-5 py-4 text-left font-semibold text-slate-500">Creator</th>
                     <th className="px-5 py-4 text-left font-semibold text-slate-500">Members</th>
                     <th className="px-5 py-4 text-left font-semibold text-slate-500">Technology</th>
+                    <th className="px-5 py-4 text-left font-semibold text-slate-500">Project Code</th>
                     <th className="px-5 py-4 text-left font-semibold text-slate-500">Phase Status</th>
                     <th className="px-5 py-4 text-left font-semibold text-slate-500">Actions</th>
                   </tr>
@@ -72,6 +73,10 @@ export default function GuideAllocatedProjectsPage() {
                         </td>
 
                         <td className="px-5 py-4 text-slate-600 dark:text-slate-300">{project.technology}</td>
+
+                        <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                          {project.projectCode || "-"}
+                        </td>
 
                         <td className="px-5 py-4">
                           <span className="inline-flex rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:text-slate-300">

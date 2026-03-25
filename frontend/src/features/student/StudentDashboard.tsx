@@ -48,7 +48,7 @@ export default function StudentDashboard() {
         <Card label="Submitted projects" value={String(projects.length)} />
         <Card
           label="Next action"
-          value={projects.length ? "Project Submitted" : "Submit project"}
+          value={projects.length ? "Project Submitted" : "Submit Your project"}
         />
       </div>
     </section>

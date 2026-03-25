@@ -6,6 +6,7 @@ import {
   fetchMyProjects,
   fetchProjectGuides,
   fetchProjectProgress,
+  fetchProjectTrackingByCode,
   fetchSelectableStudents,
   reviewProjectProgress,
   submitProject,
@@ -54,11 +55,20 @@ export function useGuideProjects() {
   });
 }
 
-export function useProjectProgress(projectId: number) {
+export function useProjectProgress(projectId: number, enabled = true) {
   return useQuery({
     queryKey: ["project-progress", projectId],
     queryFn: () => fetchProjectProgress(projectId),
-    enabled: Number.isFinite(projectId) && projectId > 0,
+    enabled: enabled && Number.isFinite(projectId) && projectId > 0,
+  });
+}
+
+export function useProjectTracking(projectCode: string) {
+  return useQuery({
+    queryKey: ["project-tracking", projectCode],
+    queryFn: () => fetchProjectTrackingByCode(projectCode),
+    enabled: projectCode.trim().length > 0,
+    retry: false,
   });
 }
 
@@ -110,6 +120,3 @@ export function useDeleteProjectProgress(projectId: number) {
     },
   });
 }
-
-
-
