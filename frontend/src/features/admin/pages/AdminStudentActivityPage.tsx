@@ -49,89 +49,59 @@ export default function AdminStudentActivityPage() {
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="grid gap-4 p-4 lg:hidden">
-          {filteredStudents.map((student) => (
-            <article
-              key={student.id}
-              className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950/70"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">
+        <div className="overflow-x-auto">
+        <table className="min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
+          <thead className="bg-slate-50 dark:bg-slate-950">
+            <tr>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Student</th>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Class</th>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Division</th>
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Roll Number</th>
+              {/* <th className="px-5 py-4 text-left font-medium text-slate-500">Projects</th> */}
+              <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            {filteredStudents.map((student) => (
+              <tr key={student.id}>
+                <td className="px-5 py-4">
+                  <p className="font-medium text-slate-800 dark:text-white">
                     {student.fullName || student.username}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    @{student.username}
-                  </p>
-                </div>
+                  {/* <p className="text-xs text-slate-500">{student.username}</p> */}
+                </td>
 
-                <span
-                  className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-medium ${
-                    student.isAssigned
-                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-                      : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  }`}
-                >
-                  {student.isAssigned ? "Active in project" : "No project"}
-                </span>
-              </div>
+                <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                  {student.class || "-"}
+                </td>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <DetailItem label="Class" value={student.class || "-"} />
-                <DetailItem label="Division" value={student.division || "-"} />
-                <DetailItem label="Roll Number" value={student.rollNumber || "-"} />
-              </div>
-            </article>
-          ))}
-        </div>
+                <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                {student.division || "-"}
+                </td>
 
-        <div className="hidden overflow-x-auto pb-2 lg:block">
-          <table className="min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <thead className="bg-slate-50 dark:bg-slate-950">
-              <tr>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Student</th>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Class</th>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Division</th>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Roll Number</th>
-                <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-              {filteredStudents.map((student) => (
-                <tr key={student.id}>
-                  <td className="px-5 py-4">
-                    <p className="font-medium text-slate-800 dark:text-white">
-                      {student.fullName || student.username}
-                    </p>
-                  </td>
+                <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                  {student.rollNumber || "-"}
+                </td>
 
-                  <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                    {student.class || "-"}
-                  </td>
+                {/* <td className="px-5 py-4 text-slate-700 dark:text-slate-200">
+                  {student.projectCount}
+                </td> */}
 
-                  <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                    {student.division || "-"}
-                  </td>
-
-                  <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                    {student.rollNumber || "-"}
-                  </td>
-
-                  <td className="px-5 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        student.isAssigned
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-slate-100 text-slate-700"
+                <td className="px-5 py-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${student.isAssigned
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-slate-100 text-slate-700"
                       }`}
-                    >
-                      {student.isAssigned ? "Active in project" : "No project"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  >
+                    {student.isAssigned ? "Active in project" : "No project"}
+                  </span>
+                </td>
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
         </div>
       </div>
     </section>
@@ -143,15 +113,6 @@ function StatCard({ label, value }: { label: string; value: number }) {
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p className="text-sm text-slate-500">{label}</p>
       <p className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{value}</p>
-    </div>
-  );
-}
-
-function DetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-900">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">{value}</p>
     </div>
   );
 }

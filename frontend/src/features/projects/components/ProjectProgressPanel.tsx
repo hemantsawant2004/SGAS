@@ -258,7 +258,7 @@ export default function ProjectProgressPanel({
       </div>
 
       <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/40">
-        <div className="overflow-x-auto pb-2">
+        <div className="overflow-x-auto">
           <div className="flex min-w-[860px] items-start">
             {orderedPhaseStatuses.map((entry, index) => (
               <div key={entry.phase} className="flex flex-1 items-center">
@@ -684,3 +684,4 @@ export default function ProjectProgressPanel({
     </section>
   );
 }
+
