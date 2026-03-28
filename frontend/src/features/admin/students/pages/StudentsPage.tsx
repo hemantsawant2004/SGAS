@@ -28,7 +28,7 @@ export default function StudentsPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
@@ -44,15 +44,18 @@ export default function StudentsPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total students" value={students.length}/>
         {/* <StatCard label="Visible results" value={filteredStudents.length} />
         <StatCard label="Editable records" value={students.length} /> */}
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+        <div className="border-b border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:hidden">
+          Swipe horizontally to view the student table.
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain">
+        <table className="min-w-[420px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
           <thead className="bg-slate-50 dark:bg-slate-950">
             <tr>
               {/* <th className="px-5 py-4 text-left font-medium text-slate-500">ID</th> */}

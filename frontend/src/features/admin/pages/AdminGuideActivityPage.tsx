@@ -12,7 +12,7 @@ export default function AdminGuideActivityPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div>
         {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
         {/* <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
@@ -20,7 +20,7 @@ export default function AdminGuideActivityPage() {
         </h1> */}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Guides with work" value={data.summary.totalGuideActivities} />
         <StatCard
           label="Total assigned load"
@@ -38,7 +38,7 @@ export default function AdminGuideActivityPage() {
             key={guide.id}
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                   {guide.fullName}

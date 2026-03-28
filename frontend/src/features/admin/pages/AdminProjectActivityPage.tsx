@@ -84,7 +84,7 @@ export default function AdminProjectActivityPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
@@ -100,7 +100,7 @@ export default function AdminProjectActivityPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total projects" value={data.summary.totalProjects} />
         <StatCard label="Allocated" value={data.summary.allocatedProjects} />
         <StatCard label="Unallocated" value={data.summary.unallocatedProjects} />
@@ -135,7 +135,10 @@ export default function AdminProjectActivityPage() {
       ) : null}
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+        <div className="border-b border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:hidden">
+          Swipe horizontally to view all project columns.
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain">
           <table className="min-w-[1280px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <thead className="bg-slate-50 dark:bg-slate-950">
               <tr>

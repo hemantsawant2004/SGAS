@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div>
         {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
         {/* <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
@@ -23,7 +23,7 @@ export default function AdminDashboard() {
         </p> */}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <DashboardCard label="Total projects" value={data.summary.totalProjects} />
         <DashboardCard label="Allocated Projects" value={data.summary.allocatedProjects} />
         <DashboardCard label="Unallocated Projects" value={data.summary.unallocatedProjects} />

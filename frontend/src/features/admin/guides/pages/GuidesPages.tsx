@@ -49,7 +49,7 @@ function GuidesPage() {
   );
 
   return (
-    <div className="space-y-8 py-6">
+    <div className="space-y-6 py-4 sm:space-y-8 sm:py-6">
       {/* Top Header & Search */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         {/* <div>
@@ -58,7 +58,7 @@ function GuidesPage() {
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Manage faculty workload and project allocations.</p>
         </div> */}
-        <div className="relative">
+        <div className="relative w-full md:w-auto">
           <input
             type="text"
             placeholder="Search by name..."
@@ -73,7 +73,7 @@ function GuidesPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[
           { label: "Total Guides", value: guides.length, color: "text-slate-900" },
           { label: "Active", value: activeGuidesCount, color: "text-slate-900" },
@@ -113,7 +113,10 @@ function GuidesPage() {
 
       {/* Modern Table Layout */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+        <div className="border-b border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:hidden">
+          Swipe horizontally to view all guide columns.
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain">
           <table className="min-w-[860px] w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">

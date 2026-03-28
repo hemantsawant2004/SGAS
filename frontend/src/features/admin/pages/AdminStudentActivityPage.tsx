@@ -23,7 +23,7 @@ export default function AdminStudentActivityPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           {/* <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Admin</p> */}
@@ -39,7 +39,7 @@ export default function AdminStudentActivityPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Students with projects" value={data.summary.totalStudentActivities} />
         <StatCard label="Total students" value={data.studentActivity.length} />
         <StatCard
@@ -49,8 +49,12 @@ export default function AdminStudentActivityPage() {
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed divide-y divide-slate-200 text-sm dark:divide-slate-800">          <thead className="bg-slate-50 dark:bg-slate-950">
+        <div className="border-b border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:hidden">
+          Swipe horizontally to view the full student table.
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain">
+          <table className="min-w-[720px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-950">
             <tr>
               <th className="px-5 py-4 text-left font-medium text-slate-500">Student</th>
               <th className="px-5 py-4 text-left font-medium text-slate-500">Class</th>
@@ -59,7 +63,7 @@ export default function AdminStudentActivityPage() {
               {/* <th className="px-5 py-4 text-left font-medium text-slate-500">Projects</th> */}
               <th className="px-5 py-4 text-left font-medium text-slate-500">Status</th>
             </tr>
-          </thead>
+            </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {filteredStudents.map((student) => (
                 <tr key={student.id}>
