@@ -27,7 +27,7 @@ app.use(
     credentials: true,
   })
 );
-app.options("*", cors({
+app.options(/.*/, cors({
   origin(origin, callback) {
     if (!origin || env.ALLOWED_ORIGINS.includes(origin)) {
       return callback(null, true);
