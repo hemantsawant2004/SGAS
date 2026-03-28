@@ -10,13 +10,6 @@ const refreshSecret: Secret =
   process.env.JWT_REFRESH_SECRET || "change-me-refresh";
 const accessTtl = (process.env.JWT_ACCESS_TTL || "15m") as SignOptions["expiresIn"];
 const refreshTtl = (process.env.JWT_REFRESH_TTL || "7d") as SignOptions["expiresIn"];
-const isProduction = process.env.NODE_ENV === "production";
-
-const authCookieOptions = {
-  httpOnly: true,
-  sameSite: isProduction ? ("none" as const) : ("lax" as const),
-  secure: isProduction,
-};
 
 function ttlToMs(ttl: SignOptions["expiresIn"]) {
   if (typeof ttl === "number") return ttl * 1000;
@@ -251,11 +244,15 @@ export async function login(req: Request, res: Response) {
   await updateRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
 
   res.cookie("accessToken", accessToken, {
-    ...authCookieOptions,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
-    ...authCookieOptions,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
   res.clearCookie("token");
@@ -281,8 +278,8 @@ export async function logout(req: Request, res: Response) {
   if (req.user?.id) {
     await updateRefreshToken(req.user.id, null, null);
   }
-  res.clearCookie("accessToken", authCookieOptions);
-  res.clearCookie("refreshToken", authCookieOptions);
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
   res.clearCookie("token");
 
   return res.json({ message: "Logged out" });
@@ -331,11 +328,15 @@ export async function refresh(req: Request, res: Response) {
     await updateRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
 
     res.cookie("accessToken", accessToken, {
-      ...authCookieOptions,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 15 * 60 * 1000,
     });
     res.cookie("refreshToken", refreshToken, {
-      ...authCookieOptions,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.clearCookie("token");
