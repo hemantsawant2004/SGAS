@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Camera } from "lucide-react";
+import type { AxiosError } from "axios";
 import { useAppSelector } from "../../../app/hooks";
 import type { CreateGuideProfileDto } from "../dto/guide.dto";
 import {
@@ -62,6 +63,8 @@ function Guide() {
   });
   const [preview, setPreview] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const user = useAppSelector((s) => s.auth.user);
   const username = user?.username;
   const { mutate: createProfile, isPending: isCreating } = useCreateGuideProfile(username);
@@ -76,29 +79,51 @@ function Guide() {
   const profileErrorStatus = (profileError as any)?.response?.status;
   const hasProfile = Boolean(existingProfile) && !profileError;
 
+  const getApiErrorMessage = (error: unknown) => {
+    const axiosError = error as AxiosError<{ message?: string }>;
+    return axiosError.response?.data?.message ?? "Unable to save profile right now. Please try again.";
+  };
+
   const onCreateSubmit = (data: CreateGuideProfileDto) => {
-    alert(`Welcome to Guide Allocation Portal ${data.fullName}`)
+    setSubmitError(null);
+    setSubmitSuccess(null);
     createProfile({
       ...data,
       experience: Number(data.experience),
+    }, {
+      onSuccess: () => {
+        setSubmitSuccess("Profile saved successfully.");
+      },
+      onError: (error) => {
+        setSubmitError(getApiErrorMessage(error));
+      },
     });
   };
 
   const onUpdateSubmit = (data: CreateGuideProfileDto) => {
-    alert(`Dear, ${data.fullName} Your Profile is Now Updated`);
+    setSubmitError(null);
+    setSubmitSuccess(null);
     updateProfile(
       {
         ...data,
         experience: Number(data.experience),
       },
       {
-        onSuccess: () => setIsEditing(false),
+        onSuccess: () => {
+          setSubmitSuccess("Profile updated successfully.");
+          setIsEditing(false);
+        },
+        onError: (error) => {
+          setSubmitError(getApiErrorMessage(error));
+        },
       }
     );
   };
 
   const startEdit = () => {
     if (!existingProfile) return;
+    setSubmitError(null);
+    setSubmitSuccess(null);
     reset({
       fullName: existingProfile.fullName,
       email: existingProfile.email,
@@ -159,6 +184,12 @@ function Guide() {
 
           <div className="px-4 pb-8 pt-24 sm:px-12 sm:pb-12 sm:pt-20 dark:bg-slate-800">
             <form onSubmit={handleSubmit(submitHandler)} className="space-y-10">
+              {submitError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {submitError}
+                </div>
+              )}
+
               <div className="bg-slate-50 p-6 rounded-2xl shadow-sm ">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6">Personal Details</h2>
 
@@ -169,6 +200,10 @@ function Guide() {
                       label="Full Name"
                       registration={register("fullName", {
                         required: "Full name is required",
+                        minLength: {
+                          value: 1,
+                          message: "Full name is required",
+                        },
                       })}
                       error={errors.fullName?.message}
                     />
@@ -180,6 +215,10 @@ function Guide() {
                       label="Email"
                       registration={register("email", {
                         required: "Email is required",
+                        pattern: {
+                          value: /^[^\s@]+@gmail\.com$/i,
+                          message: "Only Gmail accounts are allowed",
+                        },
                       })}
                       error={errors.email?.message}
                     />
@@ -191,6 +230,10 @@ function Guide() {
                       label="Phone"
                       registration={register("phone", {
                         required: "Phone Number is required",
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Phone number must be 10 digits",
+                        },
                       })}
                       error={errors.phone?.message}
                     />
@@ -212,6 +255,11 @@ function Guide() {
                   <TextAreaField
                     label="Bio"
                     registration={register("bio", {
+                      required: "Bio is required",
+                      minLength: {
+                        value: 10,
+                        message: "Bio must be at least 10 characters",
+                      },
                     })}
                     error={errors.bio?.message}
                   />
@@ -228,6 +276,10 @@ function Guide() {
                       label="Department"
                       registration={register("departmentName", {
                         required: "Department Name is required",
+                        minLength: {
+                          value: 2,
+                          message: "Department name is required",
+                        },
                       })}
                       error={errors.departmentName?.message}
                     />
@@ -239,6 +291,10 @@ function Guide() {
                       label="Qualification"
                       registration={register("qualification", {
                         required: "Qualification is required",
+                        minLength: {
+                          value: 2,
+                          message: "Qualification is required",
+                        },
                       })}
                       error={errors.qualification?.message}
                     />
@@ -250,6 +306,11 @@ function Guide() {
                       label="Experience"
                       registration={register("experience", {
                         required: "experience is required",
+                        valueAsNumber: true,
+                        validate: (value) =>
+                          Number.isFinite(value) && value >= 0
+                            ? true
+                            : "Experience must be 0 or more",
                       })}
                       error={errors.experience?.message}
                     />
@@ -260,6 +321,12 @@ function Guide() {
                       name="expertise"
                       control={control}
                       options={languageOptions}
+                      rules={{
+                        validate: (value) =>
+                          Array.isArray(value) && value.length > 0
+                            ? true
+                            : "Select at least one expertise",
+                      }}
                       error={errors.expertise?.message}
                     />
 
@@ -344,6 +411,11 @@ function Guide() {
 
         <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
           <div className="mx-auto grid max-w-7xl gap-6 sm:gap-10 lg:grid-cols-[320px_1fr]">
+            {submitSuccess && (
+              <div className="lg:col-span-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {submitSuccess}
+              </div>
+            )}
 
             {/* LEFT SIDEBAR */}
             <div className="flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-lg dark:border-white dark:bg-slate-800 sm:p-8">

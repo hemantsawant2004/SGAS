@@ -1,5 +1,5 @@
 import Select from "react-select";
-import { Controller, type Control } from "react-hook-form";
+import { Controller, type Control, type RegisterOptions } from "react-hook-form";
 
 type Option = {
   value: string;
@@ -12,6 +12,7 @@ type MultiSelectFieldProps = {
   control: Control<any>;
   options: Option[];
   error?: string;
+  rules?: RegisterOptions;
 };
 
 const MultiSelectField = ({
@@ -20,6 +21,7 @@ const MultiSelectField = ({
   control,
   options,
   error,
+  rules,
 }: MultiSelectFieldProps) => {
   return (
     <div className="relative">
@@ -35,6 +37,7 @@ const MultiSelectField = ({
       <Controller
         name={name}
         control={control}
+        rules={rules}
         render={({ field }) => (
           <Select
             options={options}

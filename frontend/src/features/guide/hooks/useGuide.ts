@@ -18,15 +18,12 @@ export const useCreateGuideProfile = (username?: string) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  
-
   return useMutation({
     mutationFn: (data: CreateGuideProfileDto) =>
       createGuideProfile(data),
 
-    onSuccess: () => {
-      // alert(`Congrats {user?.username} Your Profile is created`)
-      // confirm(`Congratulations ${User.username})`);
+    onSuccess: (profile) => {
+      queryClient.setQueryData(getGuideProfileQueryKey(username), profile);
       queryClient.invalidateQueries({ queryKey: getGuideProfileQueryKey(username) });
       navigate("/guide/createprofile");
     },
@@ -47,7 +44,8 @@ export const useUpdateGuideProfile = (username?: string) => {
 
   return useMutation({
     mutationFn: (data: CreateGuideProfileDto) => updateMyGuideProfile(data),
-    onSuccess: () => {
+    onSuccess: (profile) => {
+      queryClient.setQueryData(getGuideProfileQueryKey(username), profile);
       queryClient.invalidateQueries({ queryKey: getGuideProfileQueryKey(username) });
     },
   });
