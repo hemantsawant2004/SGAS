@@ -31,14 +31,17 @@ function Signup() {
   }, [selectedRole, step]);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-[#0f172a] md:bg-transparent">
       {/* LEFT SIDE - FORM */}
-      <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center">
+      <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center px-4 py-8 sm:px-6">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-[500px] space-y-6"
+          className="w-full max-w-md space-y-6 rounded-2xl bg-slate-950/20 p-6 sm:p-8 md:max-w-[500px] md:rounded-none md:bg-transparent md:p-0"
         >
           <h1 className="text-3xl font-semibold text-white">Sign Up</h1>
+          <p className="text-sm text-slate-400 md:hidden">
+            Create your account to get started.
+          </p>
 
           {/* STEP INDICATOR */}
           <div className="flex gap-2">
@@ -102,8 +105,8 @@ function Signup() {
           {/* STEP 2 - STUDENT ONLY */}
           {step === 2 && selectedRole === "student" && (
             <>
-              <div className="flex gap-6">
-                <div className="w-1/2">
+              <div className="flex flex-col gap-6 sm:flex-row">
+                <div className="w-full sm:w-1/2">
                   <label className="text-sm text-gray-300">Class</label>
                   <input
                     {...register("class")}
@@ -118,7 +121,7 @@ function Signup() {
                   )}
                 </div>
 
-                <div className="w-1/2">
+                <div className="w-full sm:w-1/2">
                   <label className="text-sm text-gray-300">Division</label>
                   <input
                     {...register("division")}

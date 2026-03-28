@@ -18,16 +18,19 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-[#0f172a] md:bg-transparent">
       
       {/* LEFT SIDE - LOGIN */}
-      <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center">
+      <div className="w-full md:w-1/2 bg-[#0f172a] flex items-center justify-center px-4 py-8 sm:px-6">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-[500px] space-y-6"
+          className="w-full max-w-md space-y-6 rounded-2xl bg-slate-950/20 p-6 sm:p-8 md:max-w-[500px] md:rounded-none md:bg-transparent md:p-0"
         >
           <div>
             <h1 className="text-3xl font-semibold text-white">Login</h1>
+            <p className="mt-2 text-sm text-slate-400 md:hidden">
+              Sign in to continue to the portal.
+            </p>
           </div>
 
           {location.state?.signedUp && (
@@ -76,7 +79,7 @@ function Login() {
             )}
             <Link className="text-white text-xs" to="/forgot-password">Forgot Password?</Link>
             
-          </div><br/>
+          </div>
 
           <button
             type="submit"
@@ -104,7 +107,7 @@ function Login() {
       </div>
 
       {/* RIGHT SIDE - WELCOME SECTION */}
-      <div className="w-1/2 bg-white 
+      <div className="hidden w-1/2 bg-white md:flex
                       flex flex-col items-center justify-center text-black p-10">
         <div className="max-w-md space-y-4 font-mono">
           <h2 className="text-3xl font-bold font-mono">
