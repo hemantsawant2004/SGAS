@@ -30,7 +30,6 @@ function Header({
   const theme = useAppSelector((s) => s.theme.mode);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const user = useAppSelector((s) => s.auth.user);
-  const { data: notificationsData } = useNotifications();
 
   const handleLogout = async () => {
     try {
@@ -122,11 +121,11 @@ dark:bg-slate-900/70">
     <button
       type="button"
       onClick={() => dispatch(toggleMode())}
-      className="flex h-9 w-9 items-center justify-center 
+      className="hidden h-9 w-9 items-center justify-center 
       rounded-xl border border-slate-200 
       bg-white shadow-sm transition 
       hover:scale-105 hover:shadow-md
-      dark:border-slate-700 dark:bg-slate-800"
+      dark:border-slate-700 dark:bg-slate-800 md:flex"
     >
       {theme === "dark" ? (
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -145,7 +144,7 @@ dark:bg-slate-900/70">
     <button
       type="button"
       onClick={() => navigate("/notifications")}
-      className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:scale-105 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+      className="relative hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:scale-105 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 md:flex"
       aria-label="Notifications"
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -157,11 +156,6 @@ dark:bg-slate-900/70">
         />
         <path d="M10 17a2 2 0 0 0 4 0" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
-      {notificationsData?.unreadCount ? (
-        <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-          {notificationsData.unreadCount > 99 ? "99+" : notificationsData.unreadCount}
-        </span>
-      ) : null}
     </button>
 
     {/* User Dropdown */}

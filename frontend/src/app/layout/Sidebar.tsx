@@ -3,6 +3,10 @@ import { navItemAdmin } from "../config/sidebarMenus";
 import { navIteGuide } from "../config/sidebarMenus";
 import { navStudent } from "../config/sidebarMenus";
 import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { toggleMode } from "../../features/theme/themeSlice";
+import { useNotifications } from "../../features/notifications/hooks/useNotifications";
 
 interface SidebarProps {
   mobileMenuOpen: boolean;
@@ -19,6 +23,10 @@ function Sidebar({
   userRole,
   sidebarOpen,
 }: SidebarProps) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const theme = useAppSelector((s) => s.theme.mode);
+  const { data: notificationsData } = useNotifications();
   const navItems =
     userRole === "admin"
       ? navItemAdmin
@@ -42,9 +50,9 @@ function Sidebar({
           <aside className="absolute left-0 top-0 flex h-full w-72 max-w-[85vw] flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-6 shadow-2xl">
             <div className="flex items-center justify-between px-4 pb-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                {/* <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
                   Navigation
-                </p>
+                </p> */}
                 <p className="mt-1 text-sm text-slate-200 capitalize">{userRole || "User"}</p>
               </div>
               <button
@@ -85,6 +93,55 @@ function Sidebar({
                 );
               })}
             </nav>
+
+            <div className="border-t border-slate-700/70 px-3 pt-4">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/notifications");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="relative flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-3 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M10 17a2 2 0 0 0 4 0" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                  <span>Alerts</span>
+                  {notificationsData?.unreadCount ? (
+                    <span className="absolute right-2 top-2 min-w-[18px] rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                      {notificationsData.unreadCount > 99 ? "99+" : notificationsData.unreadCount}
+                    </span>
+                  ) : null}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => dispatch(toggleMode())}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-3 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
+                >
+                  {theme === "dark" ? (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="12" cy="12" r="4" strokeWidth="1.8" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path
+                        d="M21 12.79A9 9 0 0 1 12.21 3 7 7 0 1 0 21 12.79Z"
+                        strokeWidth="1.8"
+                      />
+                    </svg>
+                  )}
+                  <span>{theme === "dark" ? "Light" : "Dark"}</span>
+                </button>
+              </div>
+            </div>
           </aside>
         </div>
       ) : null}
