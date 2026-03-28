@@ -22,15 +22,15 @@ const formatDateTime = (value?: string | null) => {
   }).format(date);
 };
 
-const notificationTypeLabel: Record<string, string> = {
-  project_assigned: "Project assignment",
-  progress_submitted: "Progress submission",
-  progress_reviewed: "Guide review",
-  project_created: "New project",
-  allocation_review_required: "Allocation review",
-  student_created: "New student",
-  guide_created: "New guide",
-};
+// const notificationTypeLabel: Record<string, string> = {
+//   project_assigned: "Project assignment",
+//   progress_submitted: "Progress submission",
+//   progress_reviewed: "Guide review",
+//   project_created: "New project",
+//   allocation_review_required: "Allocation review",
+//   student_created: "New student",
+//   guide_created: "New guide",
+// };
 
 export default function NotificationsPage() {
   const user = useAppSelector((state) => state.auth.user);
