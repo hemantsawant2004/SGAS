@@ -11,6 +11,7 @@ const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 async function start() {
   try {
     await sequelize.authenticate();
+    await sequelize.sync();
     await syncNotificationTable();
     await syncProjectCodesService();
     console.log("Database connected");
