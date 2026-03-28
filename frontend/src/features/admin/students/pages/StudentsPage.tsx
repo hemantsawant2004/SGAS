@@ -52,7 +52,7 @@ export default function StudentsPage() {
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
-        <table className="min-w-[420px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
+        <table className="min-w-[1020px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
           <thead className="bg-slate-50 dark:bg-slate-950">
             <tr>
               {/* <th className="px-5 py-4 text-left font-medium text-slate-500">ID</th> */}
