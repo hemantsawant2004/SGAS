@@ -24,7 +24,7 @@ export default function StudentProjectSubmissionPage() {
     <section className="space-y-8">
       <div>
         <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Student</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white sm:text-3xl">
           Submit a project
         </h1>
       </div>
@@ -102,9 +102,9 @@ export default function StudentProjectSubmissionPage() {
               {students.map((student) => (
                 <label
                   key={student.id}
-                  className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 text-sm dark:bg-slate-950"
+                  className="flex items-start justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 text-sm dark:bg-slate-950"
                 >
-                  <span>{student.username}</span>
+                  <span className="min-w-0 break-words">{student.username}</span>
                   <input
                     type="checkbox"
                     checked={projectMembers.includes(student.id)}

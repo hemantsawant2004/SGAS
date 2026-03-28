@@ -120,19 +120,19 @@ function Guide() {
   ) => (
     <>
       <BackButton />
-      <div className="min-h-screen  flex items-center justify-center p-6 dark:text-black">
+      <div className="min-h-screen flex items-center justify-center p-3 sm:p-6 dark:text-black">
 
-        <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden dark:border-white">
-          <div className="relative bg-gradient-to-r from-slate-700 to-slate-900 h-40 flex items-center px-10 dark:border-white">
+        <div className="w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:border-white">
+          <div className="relative flex min-h-52 items-start bg-gradient-to-r from-slate-700 to-slate-900 px-5 pb-6 pt-8 sm:h-40 sm:min-h-0 sm:items-center sm:px-10 dark:border-white">
             <div>
-              <h1 className="text-2xl font-bold text-white hover:scale-105">
+              <h1 className="text-xl font-bold text-white transition hover:scale-105 sm:text-2xl">
                 {/* {mode === "create" ? "Create Profile" : "Edit Profile"} */}
                 Guide Allocation Portal
               </h1>
-              <p className="text-slate-300 text-sm mt-1">Welcome, {user?.username}</p>
+              <p className="mt-1 text-sm text-slate-300">Welcome, {user?.username}</p>
             </div>
 
-            <div className="absolute right-10 -bottom-14">
+            <div className="absolute bottom-4 left-5 sm:-bottom-14 sm:left-auto sm:right-10">
               <label className="cursor-pointer group">
                 <input
                   type="file"
@@ -142,7 +142,7 @@ function Guide() {
                     if (file) setPreview(URL.createObjectURL(file));
                   }}
                 />
-                <div className="w-28 h-28 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-105 transition">
+                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gray-200 shadow-lg transition group-hover:scale-105 sm:h-28 sm:w-28">
                   {preview ? (
                     <img
                       src={preview}
@@ -157,7 +157,7 @@ function Guide() {
             </div>
           </div>
 
-          <div className="pt-20 px-12 pb-12 dark:bg-slate-800">
+          <div className="px-4 pb-8 pt-24 sm:px-12 sm:pb-12 sm:pt-20 dark:bg-slate-800">
             <form onSubmit={handleSubmit(submitHandler)} className="space-y-10">
               <div className="bg-slate-50 p-6 rounded-2xl shadow-sm ">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6">Personal Details</h2>
@@ -270,12 +270,12 @@ function Guide() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 {mode === "edit" && (
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="px-8 py-3 rounded-xl bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition"
+                    className="w-full rounded-xl bg-slate-200 px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-300 sm:w-auto sm:px-8"
                   >
                     Cancel
                   </button>
@@ -284,7 +284,7 @@ function Guide() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-10 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition shadow-lg"
+                  className="w-full rounded-xl bg-slate-900 px-6 py-3 font-medium text-white shadow-lg transition hover:bg-slate-800 sm:w-auto sm:px-10"
                 >
                   {isSubmitting
                     ? mode === "create"
@@ -342,13 +342,13 @@ function Guide() {
       <>
         <BackButton />
 
-        <div className="min-h-screen py-10 px-6">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-[320px_1fr] gap-10">
+        <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
+          <div className="mx-auto grid max-w-7xl gap-6 sm:gap-10 lg:grid-cols-[320px_1fr]">
 
             {/* LEFT SIDEBAR */}
-            <div className="bg-white rounded-3xl shadow-lg p-8 flex flex-col items-center text-center border border-slate-200 dark:border-white dark:bg-slate-800 ">
+            <div className="flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-lg dark:border-white dark:bg-slate-800 sm:p-8">
 
-              <div className="w-32 h-32 rounded-full bg-slate-900 text-white flex items-center justify-center text-4xl font-bold shadow-md dark:text-white dark:bg-gray-600">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-900 text-3xl font-bold text-white shadow-md dark:bg-gray-600 dark:text-white sm:h-32 sm:w-32 sm:text-4xl">
                 {existingProfile.fullName.charAt(0)}
               </div>
 
@@ -360,7 +360,7 @@ function Guide() {
                 {existingProfile.departmentName}
               </p> */}
 
-              <div className="mt-6 w-full border-t pt-6 space-y-4 text-sm text-slate-600 dark:text-white">
+              <div className="mt-6 w-full space-y-4 border-t pt-6 text-sm text-slate-600 dark:text-white">
                 <div>
                   <p className="text-xs text-slate-400 uppercase dark:text-white">Email</p>
                   <p className="font-medium">{existingProfile.email}</p>
@@ -391,7 +391,7 @@ function Guide() {
             <div className="space-y-10">
 
               {/* ABOUT SECTION */}
-              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200 dark:bg-slate-800 dark:border-white">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-white dark:bg-slate-800 sm:p-8">
                 <h2 className="text-lg font-semibold text-slate-800 mb-4 dark:text-white">
                   About Me
                 </h2>
@@ -401,7 +401,7 @@ function Guide() {
               </div>
 
               {/* QUALIFICATIONS */}
-              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200 dark:bg-slate-800">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:bg-slate-800 sm:p-8">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6 dark:text-white">
                   Qualifications
                 </h2>
@@ -414,7 +414,7 @@ function Guide() {
               </div>
 
               {/* EXPERTISE */}
-              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200 dark:bg-slate-800 dark:text-white">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:bg-slate-800 dark:text-white sm:p-8">
                 <h2 className="text-lg font-semibold text-slate-800 mb-6 dark:text-white">
                   Technical Expertise
                 </h2>

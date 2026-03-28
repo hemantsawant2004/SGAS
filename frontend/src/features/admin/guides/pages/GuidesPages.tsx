@@ -88,22 +88,22 @@ function GuidesPage() {
 
       {/* Bulk Action Bar */}
       {isAdmin && (
-        <div className="flex dark:text-white flex-col items-center justify-between gap-4 rounded-2xl border border-2px p-6 text-black shadow-lg shadow-indigo-200 dark:shadow-none md:flex-row">
+        <div className="flex flex-col gap-4 rounded-2xl border border-2px p-4 text-black shadow-lg shadow-indigo-200 dark:text-white dark:shadow-none sm:p-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-lg font-bold">You can Assign Max Limit to all guides</h3>
             {/* <p className="text-sm text-indigo-100">Update project limits for all active guides instantly.</p> */}
           </div>
-          <div className="flex w-full gap-2 md:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto">
             <input
               type="number"
               placeholder="Max"
               value={bulkLimit}
               onChange={(e) => setBulkLimit(e.target.value)}
-              className="w-20 border rounded-lg bg-white/20 text-black px-3 py-2 placeholder:text-indigo-200 focus:ring-2 focus:ring-white"
+              className="w-full rounded-lg border bg-white/20 px-3 py-2 text-black placeholder:text-indigo-200 focus:ring-2 focus:ring-white sm:w-20"
             />
             <button
               onClick={() => setAllGuideLimits(Number(bulkLimit))}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-indigo-50 transition-colors"
+              className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-indigo-50"
             >
               Apply to All
             </button>
@@ -114,7 +114,7 @@ function GuidesPage() {
       {/* Modern Table Layout */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm">
+          <table className="min-w-[860px] w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">
                 <th className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Guide</th>

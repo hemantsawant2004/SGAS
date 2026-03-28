@@ -32,7 +32,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
       "Guide allocation pending";
 
     return (
-      <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-8 shadow-sm dark:border-emerald-900 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+      <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm dark:border-emerald-900 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 sm:p-8">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-10 top-10 h-4 w-4 rounded-full bg-amber-300 animate-bounce" />
           <div className="absolute right-16 top-20 h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
@@ -48,7 +48,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
           <p className="mt-6 text-sm uppercase tracking-[0.35em] text-emerald-600 dark:text-emerald-400">
             Project Submitted
           </p>
-          <h1 className="mt-3 text-4xl font-semibold text-slate-900 dark:text-white">
+          <h1 className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white sm:text-4xl">
             Submission successful
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
@@ -95,7 +95,7 @@ export default function StudentProjectSubmissionCelebrationPage() {
     <section className="space-y-8">
       <div>
         <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Student</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white sm:text-3xl">
           Submit a project
         </h1>
       </div>
@@ -175,9 +175,9 @@ export default function StudentProjectSubmissionCelebrationPage() {
               {students.map((student) => (
                 <label
                   key={student.id}
-                  className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 text-sm dark:bg-slate-950"
+                  className="flex items-start justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 text-sm dark:bg-slate-950"
                 >
-                  <span>{student.username}</span>
+                  <span className="min-w-0 break-words">{student.username}</span>
                   <input
                     type="checkbox"
                     checked={projectMembers.includes(student.id)}
