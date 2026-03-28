@@ -20,11 +20,11 @@ export const useLogin = () => {
 
   const login = useMutation({
     mutationFn: loginApi,
-    onSuccess: ({ user }) => {
+    onSuccess: ({ user, accessToken }) => {
       //console.log("insuccess",accessToken)
       console.log("userrr", user)
       //dispatch(setUser(user));
-      dispatch(setAuthenticated(user))
+      dispatch(setAuthenticated({ user, accessToken }))
       nav(loc.state?.from?.pathname ?? '/dashboard', { replace: true });
     },
     onError: (err: any) => {

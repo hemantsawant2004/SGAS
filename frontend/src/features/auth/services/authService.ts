@@ -1,5 +1,6 @@
 import { api } from "../../../app/config/axios.config";
 import {
+  AuthSessionResponse,
   SessionUser,
   type LoginRequestType,
   type SignupRequestType,
@@ -13,8 +14,11 @@ export async function fetchMe() {
 export async function loginApi(payload: LoginRequestType) {
   console.log("inside login request",payload)
   const { data } = await api.post('/auth/login', payload);
- 
-  return { user: SessionUser.parse(data) };
+
+  return AuthSessionResponse.parse({
+    user: SessionUser.parse(data),
+    accessToken: data.accessToken,
+  });
 
 }
 export async function signupApi(payload: SignupRequestType) {

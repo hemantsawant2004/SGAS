@@ -1,6 +1,6 @@
 import axios from "axios";
 import { store } from "../store";
-import { logout } from "../../features/auth/authSlice";
+import { setAccessToken, logout } from "../../features/auth/authSlice";
 
 const resolveApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL?.trim();
@@ -23,6 +23,19 @@ const resolveApiBaseUrl = () => {
 export const api = axios.create({
   baseURL: resolveApiBaseUrl(),
   withCredentials: true,
+});
+
+api.interceptors.request.use((config) => {
+  const token = store.getState().auth.accessToken;
+
+  if (token) {
+    config.headers = config.headers ?? {};
+    if (!config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  return config;
 });
 
 let isRefreshing = false;
@@ -61,7 +74,14 @@ api.interceptors.response.use(
         refreshPromise = api.post("/auth/refresh"); // backend sets new cookies
       }
 
-      await refreshPromise;
+      const refreshResponse = await refreshPromise;
+      const nextAccessToken = refreshResponse?.data?.accessToken;
+
+      if (typeof nextAccessToken === "string" && nextAccessToken) {
+        store.dispatch(setAccessToken(nextAccessToken));
+        original.headers = original.headers ?? {};
+        original.headers.Authorization = `Bearer ${nextAccessToken}`;
+      }
 
       isRefreshing = false;
       refreshPromise = null;

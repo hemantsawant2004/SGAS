@@ -67,3 +67,9 @@ export const SessionUser = z.object({
   role: z.string(),
 });
 export type SessionUser = z.infer<typeof SessionUser>;
+
+export const AuthSessionResponse = z.object({
+  user: SessionUser,
+  accessToken: z.string().min(1),
+});
+export type AuthSessionResponse = z.infer<typeof AuthSessionResponse>;

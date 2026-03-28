@@ -17,7 +17,7 @@ useEffect(() => {
     dispatch(setAuthChecking());
     try {
       const user = await fetchMe();
-      dispatch(setAuthenticated(user));
+      dispatch(setAuthenticated({ user }));
     } catch {
       dispatch(setUnauthenticated());
     }

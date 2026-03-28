@@ -273,6 +273,7 @@ export async function login(req: Request, res: Response) {
     username: user.username,
     fullName: user.given_name,
     role: user.role,
+    accessToken,
   });
 }
 
@@ -290,7 +291,15 @@ export async function logout(req: Request, res: Response) {
 
 export async function me(req: Request, res: Response) {
   if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-  return res.json(req.user);
+  const user = await findUserById(req.user.id);
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  return res.json({
+    id: user.id.toString(),
+    username: user.username,
+    fullName: user.given_name,
+    role: user.role,
+  });
 }
 
 export async function refresh(req: Request, res: Response) {
@@ -335,10 +344,11 @@ export async function refresh(req: Request, res: Response) {
     res.clearCookie("token", clearCookieOptions);
 
     return res.json({
-      id: user.id,
+      id: user.id.toString(),
       username: user.username,
-      given_name: user.given_name,
+      fullName: user.given_name,
       role: user.role,
+      accessToken,
     });
   } catch {
     return res.status(401).json({ message: "Invalid refresh token" });
