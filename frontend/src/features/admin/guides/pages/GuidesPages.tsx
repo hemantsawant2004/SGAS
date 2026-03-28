@@ -113,7 +113,7 @@ function GuidesPage() {
 
       {/* Modern Table Layout */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pb-2">
           <table className="min-w-[860px] w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/50">

@@ -6,6 +6,7 @@ import {
 } from "../hooks/useAdminOverview";
 import { FaTrash } from "react-icons/fa";
 import { api } from "../../../app/config/axios.config";
+import type { Project } from "../../projects/services/projects.service";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-";
@@ -43,6 +44,22 @@ const getFileUrl = (fileUrl?: string | null) => {
     ? fileUrl
     : `${apiRoot}${fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`}`;
 };
+
+const getGuideDisplayName = (project: Project) =>
+  project.assignedGuide?.fullName ||
+  project.assignedGuide?.fullname ||
+  "Not allocated";
+
+const getPreferredGuideName = (project: Project) =>
+  project.preferredGuide?.fullName || project.preferredGuide?.fullname || "-";
+
+const getCreatorName = (project: Project) =>
+  project.creator?.given_name || project.creator?.username || "-";
+
+const getMemberNames = (project: Project) =>
+  project.members?.length
+    ? project.members.map((member) => member.given_name || member.username).join(", ")
+    : "No extra members";
 
 export default function AdminProjectActivityPage() {
   const { data, isLoading, isError } = useAdminOverview();
@@ -135,7 +152,140 @@ export default function AdminProjectActivityPage() {
       ) : null}
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+        <div className="grid gap-4 p-4 lg:hidden">
+          {filteredProjects.map((project) => {
+            const isPending = !(project as any).guideId && !project.assignedGuide;
+            const selectedGuideId =
+              selectedGuides[project.id] ??
+              String(
+                (project as any).guideId ??
+                  project.assignedGuide?.id ??
+                  project.preferredGuide?.id ??
+                  ""
+              );
+            const finalSubmissionUrl = getFileUrl(project.finalSubmissionPdf?.fileUrl);
+            const hasFinalSubmissionPdf =
+              project.finalSubmissionPdf?.fileMimeType === "application/pdf" &&
+              Boolean(finalSubmissionUrl);
+
+            return (
+              <article
+                key={project.id}
+                className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950/70"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">
+                      {project.title}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      Code: {project.projectCode || "-"}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
+                      project.currentPhaseStatus === "completed"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/30 dark:text-emerald-300"
+                        : project.currentPhaseStatus === "in_progress"
+                          ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-300"
+                          : "border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300"
+                    }`}
+                  >
+                    {formatPhaseLabel(project.currentPhase)}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <DetailItem label="Technology" value={project.technology} />
+                  <DetailItem label="Student Team" value={getCreatorName(project)} />
+                  <DetailItem label="Members" value={getMemberNames(project)} />
+                  <DetailItem label="Preferred Guide" value={getPreferredGuideName(project)} />
+                  <DetailItem label="Allocated Guide" value={getGuideDisplayName(project)} />
+                  <DetailItem
+                    label="Completed At"
+                    value={project.completedAt ? formatDateTime(project.completedAt) : "-"}
+                  />
+                </div>
+
+                {(project as any).allocationIssue ? (
+                  <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                    {(project as any).allocationIssue.message}
+                  </p>
+                ) : null}
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {hasFinalSubmissionPdf && finalSubmissionUrl ? (
+                    <a
+                      href={finalSubmissionUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      View PDF
+                    </a>
+                  ) : (
+                    <span className="inline-flex rounded-2xl border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-400 dark:border-slate-700 dark:text-slate-500">
+                      Final submission pending
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-4 space-y-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+                  {isPending ? (
+                    <>
+                      <select
+                        value={selectedGuideId}
+                        onChange={(event) =>
+                          setSelectedGuides((current) => ({
+                            ...current,
+                            [project.id]: event.target.value,
+                          }))
+                        }
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      >
+                        <option value="">Select active guide</option>
+                        {activeGuides.map((guide) => (
+                          <option key={guide.id} value={guide.id}>
+                            {guide.fullName} ({guide.assignedProjects}/{guide.maxProjects})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={isAssigning || !selectedGuideId}
+                        onClick={() =>
+                          assignGuide({
+                            projectId: project.id,
+                            guideId: Number(selectedGuideId),
+                          })
+                        }
+                        className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
+                      >
+                        {isAssigning ? "Assigning..." : "Assign guide"}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="inline-flex rounded-2xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+                      Already allocated
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={() => deleteProject(project.id)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/20"
+                  >
+                    <FaTrash />
+                    Delete project
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-[1280px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <thead className="bg-slate-50 dark:bg-slate-950">
               <tr>
@@ -179,25 +329,21 @@ export default function AdminProjectActivityPage() {
 
                   <td className="px-5 py-4 align-top">
                     <p className="font-medium text-slate-800 dark:text-white">
-                      {project.creator?.given_name || project.creator?.username || "-"}
+                      {getCreatorName(project)}
                     </p>
                     <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                       Members:{" "}
-                      {project.members?.length
-                        ? project.members.map((member) => member.given_name || member.username).join(", ")
-                        : "No extra members"}
+                      {getMemberNames(project)}
                     </p>
                   </td>
 
                   <td className="px-5 py-4 align-top text-slate-600 dark:text-slate-500">
-                    {project.preferredGuide?.fullName || project.preferredGuide?.fullname || "-"}
+                    {getPreferredGuideName(project)}
                   </td>
 
                   <td className="px-5 py-4 align-top">
                     <span className="rounded-full px-3 py-1 text-xs font-medium text-black dark:text-white">
-                      {project.assignedGuide?.fullName ||
-                        project.assignedGuide?.fullname ||
-                        "Not allocated"}
+                      {getGuideDisplayName(project)}
                     </span>
                     {(project as any).allocationIssue ? (
                       <p className="mt-2 max-w-xs text-xs text-amber-700 dark:text-amber-300">
@@ -305,6 +451,15 @@ function StatCard({ label, value }: { label: string; value: number }) {
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <p className="text-sm text-slate-500">{label}</p>
       <p className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{value}</p>
+    </div>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-900">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">{value}</p>
     </div>
   );
 }
