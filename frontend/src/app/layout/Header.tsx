@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '../hooks';
 import { useNavigate } from 'react-router-dom';
 import { toggleMode } from '../../features/theme/themeSlice';
 import { logout } from '../../features/auth/authSlice';
-import { useNotifications } from '../../features/notifications/hooks/useNotifications';
 
 interface HeaderProps {
   userMenuOpen: boolean
