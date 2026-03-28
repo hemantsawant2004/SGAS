@@ -49,19 +49,19 @@ function Header({
 
   return (
     <>
-<header className="sticky top-0 z-40 flex h-16 items-center justify-between 
+<header className="sticky top-0 z-40 flex min-h-16 items-center justify-between 
 border-b border-slate-200/60 
 bg-white/70 backdrop-blur-xl 
-px-6 shadow-sm 
+px-3 sm:px-6 shadow-sm 
 dark:border-slate-800/60 
 dark:bg-slate-900/70">
 
   {/* LEFT SECTION */}
-  <div className="flex items-center gap-4">
+  <div className="flex min-w-0 items-center gap-2 sm:gap-4">
     <button
       type="button"
       onClick={() => setMobileMenuOpen((open) => !open)}
-      className="flex items-center justify-center rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition md:hidden"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition md:hidden"
       aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
       aria-expanded={mobileMenuOpen}
     >
@@ -91,9 +91,9 @@ dark:bg-slate-900/70">
     </button>
 
     {/* Logo + Title */}
-    <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 items-center justify-center 
-      rounded-2xl  
+    <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center 
+      rounded-xl sm:rounded-2xl  
       shadow-lg shadow-indigo-500/20 overflow-hidden">
 
         <img
@@ -103,11 +103,12 @@ dark:bg-slate-900/70">
         />
       </div>
 
-      <div className="leading-tight">
-        <p className="text-lg font-semibold tracking-tight text-slate-800 dark:text-white">
-          Guide Allocation Portal
+      <div className="min-w-0 leading-tight">
+        <p className="truncate text-base font-semibold tracking-tight text-slate-800 dark:text-white sm:text-lg">
+          <span className="sm:hidden">Allocation Portal</span>
+          <span className="hidden sm:inline">Guide Allocation Portal</span>
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="hidden text-xs text-slate-500 dark:text-slate-400 sm:block">
           Logged in as <span className="font-medium capitalize">{user?.role}</span>
         </p>
       </div>
@@ -115,7 +116,7 @@ dark:bg-slate-900/70">
   </div>
 
   {/* RIGHT SECTION */}
-  <div className="flex items-center gap-4">
+  <div className="ml-2 flex shrink-0 items-center gap-2 sm:gap-4">
 
     {/* Theme Toggle */}
     <button
@@ -167,8 +168,8 @@ dark:bg-slate-900/70">
     <div className="relative" ref={userMenuRef}>
       <button
         onClick={() => setUserMenuOpen(o => !o)}
-        className="flex items-center gap-3 rounded-xl 
-        border border-slate-200 bg-white px-3 py-1.5 
+        className="flex items-center gap-2 rounded-xl 
+        border border-slate-200 bg-white px-2 py-1.5 sm:px-3 
         shadow-sm transition hover:shadow-md 
         dark:border-slate-700 dark:bg-slate-800"
       >
@@ -190,7 +191,7 @@ dark:bg-slate-900/70">
           </p>
         </div>
 
-        <svg className="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg className="hidden h-4 w-4 text-slate-400 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M6 9l6 6 6-6" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </button>
