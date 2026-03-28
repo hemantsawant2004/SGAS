@@ -44,6 +44,8 @@ export default function AppLayout() {
         setUserMenuOpen={setUserMenuOpen}
         initial={initials}
         username={user?.username || ""}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />

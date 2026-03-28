@@ -11,6 +11,8 @@ interface HeaderProps {
   setUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   initial: string
   username: string
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -20,6 +22,8 @@ function Header({
   setUserMenuOpen,
   initial,
   username,
+  mobileMenuOpen,
+  setMobileMenuOpen,
   sidebarOpen,
   setSidebarOpen
 }: HeaderProps) {
@@ -54,6 +58,21 @@ dark:bg-slate-900/70">
 
   {/* LEFT SECTION */}
   <div className="flex items-center gap-4">
+    <button
+      type="button"
+      onClick={() => setMobileMenuOpen((open) => !open)}
+      className="flex items-center justify-center rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition md:hidden"
+      aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+      aria-expanded={mobileMenuOpen}
+    >
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        {mobileMenuOpen ? (
+          <path d="M6 6l12 12M18 6 6 18" strokeWidth="2" strokeLinecap="round" />
+        ) : (
+          <path d="M4 7h16M4 12h16M4 17h16" strokeWidth="2" strokeLinecap="round" />
+        )}
+      </svg>
+    </button>
 
     {/* Sidebar Toggle */}
     <button
