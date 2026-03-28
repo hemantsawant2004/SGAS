@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+type CookieSameSite = "lax" | "strict" | "none";
+
 const need = (k: string) => {
   const v = process.env[k];
   if (!v) throw new Error(`Missing env: ${k}`);
@@ -13,6 +15,14 @@ const parseOrigins = (value?: string) =>
     .filter(Boolean);
 
 const allowedOrigins = parseOrigins(process.env.WEB_ORIGIN);
+const rawCookieSameSite = process.env.COOKIE_SAME_SITE;
+
+const cookieSameSite: CookieSameSite =
+  rawCookieSameSite === "none" ||
+  rawCookieSameSite === "strict" ||
+  rawCookieSameSite === "lax"
+    ? rawCookieSameSite
+    : "lax";
 
 export const env = {
   JWT_SECRET: need("JWT_SECRET"),
@@ -21,12 +31,7 @@ export const env = {
     ? allowedOrigins
     : ["http://localhost:3000", "http://localhost:5173"],
   COOKIE_SECRET: process.env.COOKIE_SECRET || "default_secret",
-  COOKIE_SAME_SITE:
-    process.env.COOKIE_SAME_SITE === "none" ||
-    process.env.COOKIE_SAME_SITE === "strict" ||
-    process.env.COOKIE_SAME_SITE === "lax"
-      ? process.env.COOKIE_SAME_SITE
-      : "lax",
+  COOKIE_SAME_SITE: cookieSameSite,
   COOKIE_SECURE:
     process.env.COOKIE_SECURE === "true"
       ? true
