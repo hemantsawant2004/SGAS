@@ -2,8 +2,26 @@ import axios from "axios";
 import { store } from "../store";
 import { logout } from "../../features/auth/authSlice";
 
+const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL?.trim();
+
+  if (envUrl) {
+    return envUrl;
+  }
+
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:4000/api";
+    }
+  }
+
+  return "/api";
+};
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+  baseURL: resolveApiBaseUrl(),
   withCredentials: true,
 });
 

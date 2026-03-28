@@ -4,6 +4,7 @@ import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import crypto from "crypto";
 import {createPreUser,findUserById,findUserByUsername,updateUserPassword,updateRefreshToken} from "./user.service";
 import type {CreateUserInput,LoginInput,SignupInput} from "./user.dto";
+import { env } from "../../config/env";
 
 const jwtSecret: Secret = process.env.JWT_SECRET || "change-me";
 const refreshSecret: Secret =
@@ -33,6 +34,18 @@ function ttlToMs(ttl: SignOptions["expiresIn"]) {
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
+
+const buildCookieOptions = (maxAge: number) => ({
+  httpOnly: true,
+  sameSite: env.COOKIE_SAME_SITE,
+  secure: env.COOKIE_SECURE,
+  maxAge,
+});
+
+const clearCookieOptions = {
+  sameSite: env.COOKIE_SAME_SITE,
+  secure: env.COOKIE_SECURE,
+};
 
 function signAccessToken(user: { id: number; username: string; role: string }) {
   return jwt.sign(
@@ -243,19 +256,9 @@ export async function login(req: Request, res: Response) {
   const refreshExpiresAt = new Date(Date.now() + ttlToMs(refreshTtl));
   await updateRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
 
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 15 * 60 * 1000,
-  });
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-  res.clearCookie("token");
+  res.cookie("accessToken", accessToken, buildCookieOptions(15 * 60 * 1000));
+  res.cookie("refreshToken", refreshToken, buildCookieOptions(7 * 24 * 60 * 60 * 1000));
+  res.clearCookie("token", clearCookieOptions);
 
   // Backward compatibility for older clients using "token"
   // res.cookie("token", accessToken, {
@@ -278,9 +281,9 @@ export async function logout(req: Request, res: Response) {
   if (req.user?.id) {
     await updateRefreshToken(req.user.id, null, null);
   }
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-  res.clearCookie("token");
+  res.clearCookie("accessToken", clearCookieOptions);
+  res.clearCookie("refreshToken", clearCookieOptions);
+  res.clearCookie("token", clearCookieOptions);
 
   return res.json({ message: "Logged out" });
 }
@@ -327,19 +330,9 @@ export async function refresh(req: Request, res: Response) {
     const refreshExpiresAt = new Date(Date.now() + ttlToMs(refreshTtl));
     await updateRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
 
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 15 * 60 * 1000,
-    });
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.clearCookie("token");
+    res.cookie("accessToken", accessToken, buildCookieOptions(15 * 60 * 1000));
+    res.cookie("refreshToken", refreshToken, buildCookieOptions(7 * 24 * 60 * 60 * 1000));
+    res.clearCookie("token", clearCookieOptions);
 
     return res.json({
       id: user.id,
