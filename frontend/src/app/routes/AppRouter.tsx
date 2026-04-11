@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import AppLayout from '../layout/AppLayout';
 import ProtectedRoute from './guards/ProtectedRoute';
 import Login from '../../features/auth/pages/Login';
@@ -77,7 +77,8 @@ const router = createBrowserRouter([
         children: [
           { path: "/dashboard", element: <DashboardResolver /> },
           { path: "/admin/projects", element: <AdminProjectActivityPage /> },
-          { path: "/admin/reports", element: <ReportsPage /> },
+          { path: "/admin/reports", element: <Navigate to="/admin/reports/dashboard-summary" replace /> },
+          { path: "/admin/reports/:reportType", element: <ReportsPage /> },
           { path: "/admin/guide-activity", element: <AdminGuideActivityPage /> },
           { path: "/admin/student-activity", element: <AdminStudentActivityPage /> },
           { path: "/admin-guides", element: <GuidesPage /> },

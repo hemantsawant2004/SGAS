@@ -9,13 +9,31 @@ import {
   FiBarChart2,
   FiActivity,
   FiSearch,
+  FiChevronRight,
 } from "react-icons/fi";
 
+export interface SidebarNavItem {
+  label: string;
+  to: string;
+  icon: any;
+  children?: SidebarNavItem[];
+}
 
-export const navItemAdmin = [
+export const navItemAdmin: SidebarNavItem[] = [
   { label: "Dashboard", to: "/admin/dashboard", icon: FiHome },
   { label: "Projects", to: "/admin/projects", icon: FiClipboard },
-  { label: "Reports", to: "/admin/reports", icon: FiLayers },
+  {
+    label: "Reports",
+    to: "/admin/reports",
+    icon: FiLayers,
+    children: [
+      { label: "Dashboard Summary", to: "/admin/reports/dashboard-summary", icon: FiChevronRight },
+      { label: "Student Allocation", to: "/admin/reports/student-allocation", icon: FiChevronRight },
+      { label: "Guide Workload", to: "/admin/reports/guide-workload", icon: FiChevronRight },
+      { label: "Unassigned Students", to: "/admin/reports/unassigned-students", icon: FiChevronRight },
+      { label: "Department-wise", to: "/admin/reports/department-wise", icon: FiChevronRight },
+    ],
+  },
   { label: "Guide Activity", to: "/admin/guide-activity", icon: FiActivity },
   { label: "Student Activity", to: "/admin/student-activity", icon: FiBarChart2 },
   { label: "Guides", to: "/admin-guides", icon: FiUser },
@@ -25,7 +43,7 @@ export const navItemAdmin = [
 ];
 
 
-export const navIteGuide = [
+export const navIteGuide: SidebarNavItem[] = [
   { label: "Dashboard", to: "/guide/dashboard", icon: FiHome },
   { label: "Allocated Projects", to: "/guide/allocatedprojects", icon: FiLayers },
   { label: "Track Project", to: "/projects/track", icon: FiSearch },
@@ -34,7 +52,7 @@ export const navIteGuide = [
 ];
 
 
-export const navStudent = [
+export const navStudent: SidebarNavItem[] = [
   { label: "Dashboard", to: "/student/dashboard", icon: FiHome },
   { label: "Guides", to: "/student/guides", icon: FiBookOpen },
   { label: "Submit Project", to: "/student/projects/new", icon: FiFolderPlus },

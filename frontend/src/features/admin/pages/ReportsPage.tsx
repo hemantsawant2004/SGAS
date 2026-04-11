@@ -1,13 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiCalendar, FiDownload, FiFileText, FiFilter, FiPrinter } from "react-icons/fi";
+import { Navigate, useParams } from "react-router-dom";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 
 type ReportType =
-  | "project-summary"
+  | "dashboard-summary"
+  | "student-allocation"
   | "guide-workload"
-  | "student-participation"
-  | "allocation-alerts"
-  | "completed-submissions";
+  | "unassigned-students"
+  | "department-wise";
 
 type ReportRow = Record<string, string | number>;
 
@@ -33,20 +34,32 @@ interface GeneratedReport {
 
 const REPORT_CONFIGS: ReportConfig[] = [
   {
-    id: "project-summary",
-    title: "Project Summary Report",
-    eyebrow: "Operations",
-    description: "Track project ownership, allocation, technology choices, and current phase progress.",
+    id: "dashboard-summary",
+    title: "Dashboard Summary Report",
+    eyebrow: "Overview",
+    description: "See the overall project, guide, student, and allocation health of the system in one report.",
     tone: "from-slate-950 via-slate-900 to-slate-800",
     columns: [
-      { key: "projectCode", label: "Project Code" },
-      { key: "title", label: "Project" },
-      { key: "creator", label: "Creator" },
-      { key: "members", label: "Members" },
-      { key: "technology", label: "Technology" },
-      { key: "assignedGuide", label: "Assigned Guide" },
-      { key: "phase", label: "Current Phase" },
+      { key: "metric", label: "Metric" },
+      { key: "value", label: "Value" },
       { key: "status", label: "Status" },
+      { key: "notes", label: "Notes" },
+    ],
+  },
+  {
+    id: "student-allocation",
+    title: "Student Allocation Report",
+    eyebrow: "Allocation",
+    description: "Track which students are allocated to projects and how many project links each student has.",
+    tone: "from-emerald-700 via-teal-700 to-cyan-700",
+    columns: [
+      { key: "fullName", label: "Student" },
+      { key: "username", label: "Username" },
+      { key: "class", label: "Class" },
+      { key: "division", label: "Division" },
+      { key: "rollNumber", label: "Roll Number" },
+      { key: "projectCount", label: "Project Count" },
+      { key: "statusLabel", label: "Allocation Status" },
     ],
   },
   {
@@ -66,48 +79,33 @@ const REPORT_CONFIGS: ReportConfig[] = [
     ],
   },
   {
-    id: "student-participation",
-    title: "Student Participation Report",
-    eyebrow: "Participation",
-    description: "See which students are active in projects, grouped by class, division, and project involvement.",
-    tone: "from-emerald-700 via-teal-700 to-cyan-700",
+    id: "unassigned-students",
+    title: "Unassigned Students Report",
+    eyebrow: "Availability",
+    description: "List all students who are not currently attached to any project so they can be allocated quickly.",
+    tone: "from-red-700 via-rose-700 to-orange-700",
     columns: [
       { key: "fullName", label: "Student" },
       { key: "username", label: "Username" },
       { key: "class", label: "Class" },
       { key: "division", label: "Division" },
       { key: "rollNumber", label: "Roll Number" },
-      { key: "projectCount", label: "Project Count" },
-      { key: "status", label: "Status" },
+      { key: "statusLabel", label: "Status" },
     ],
   },
   {
-    id: "allocation-alerts",
-    title: "Allocation Alerts Report",
-    eyebrow: "Exceptions",
-    description: "Focus on projects that need manual intervention because guide allocation could not complete automatically.",
-    tone: "from-red-700 via-rose-700 to-orange-700",
-    columns: [
-      { key: "projectTitle", label: "Project" },
-      { key: "creatorName", label: "Creator" },
-      { key: "preferredGuideName", label: "Preferred Guide" },
-      { key: "issueCode", label: "Issue Code" },
-      { key: "message", label: "Admin Note" },
-    ],
-  },
-  {
-    id: "completed-submissions",
-    title: "Completed Submission Report",
-    eyebrow: "Delivery",
-    description: "Review completed projects, final submission availability, and close-out completion details.",
+    id: "department-wise",
+    title: "Department-wise Report",
+    eyebrow: "Departments",
+    description: "View project allocation and guide capacity grouped by department for department-level monitoring.",
     tone: "from-indigo-700 via-blue-700 to-sky-700",
     columns: [
-      { key: "projectCode", label: "Project Code" },
-      { key: "title", label: "Project" },
-      { key: "creator", label: "Creator" },
-      { key: "assignedGuide", label: "Assigned Guide" },
-      { key: "completedAt", label: "Completed At" },
-      { key: "finalSubmission", label: "Final Submission" },
+      { key: "departmentName", label: "Department" },
+      { key: "guideCount", label: "Guides" },
+      { key: "activeGuideCount", label: "Active Guides" },
+      { key: "assignedProjects", label: "Assigned Projects" },
+      { key: "remainingCapacity", label: "Remaining Capacity" },
+      { key: "statusLabel", label: "Load Status" },
     ],
   },
 ];
@@ -126,21 +124,6 @@ const formatDateTime = (value?: string | null) => {
     minute: "2-digit",
   }).format(date);
 };
-
-const formatPhaseLabel = (value?: string | null) => {
-  if (!value) return "-";
-  if (value === "Completed") return value;
-
-  return value
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-};
-
-const formatMembers = (members?: Array<{ given_name?: string; username: string }>) =>
-  members?.length
-    ? members.map((member) => member.given_name || member.username).join(", ")
-    : "No extra members";
 
 const toCsvValue = (value: string | number) => {
   const normalized = String(value ?? "");
@@ -183,43 +166,94 @@ const getWorkloadBand = (assignedProjects: number, maxProjects: number) => {
 };
 
 export default function ReportsPage() {
+  const { reportType } = useParams<{ reportType: string }>();
   const { data, isLoading, isError } = useAdminOverview();
-  const [selectedReport, setSelectedReport] = useState<ReportType>("project-summary");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [generatedAt, setGeneratedAt] = useState(() => new Date().toISOString());
+  const selectedReport = (reportType as ReportType) || "dashboard-summary";
+
+  const isValidReport = REPORT_CONFIGS.some((report) => report.id === selectedReport);
+
+  useEffect(() => {
+    setSearch("");
+    setStatusFilter("all");
+    setGeneratedAt(new Date().toISOString());
+  }, [selectedReport]);
 
   const activeReport = REPORT_CONFIGS.find((report) => report.id === selectedReport) ?? REPORT_CONFIGS[0];
 
   const generatedReports = useMemo<Record<ReportType, GeneratedReport>>(() => {
     if (!data) {
       return {
-        "project-summary": { metrics: [], insights: [], rows: [] },
+        "dashboard-summary": { metrics: [], insights: [], rows: [] },
+        "student-allocation": { metrics: [], insights: [], rows: [] },
         "guide-workload": { metrics: [], insights: [], rows: [] },
-        "student-participation": { metrics: [], insights: [], rows: [] },
-        "allocation-alerts": { metrics: [], insights: [], rows: [] },
-        "completed-submissions": { metrics: [], insights: [], rows: [] },
+        "unassigned-students": { metrics: [], insights: [], rows: [] },
+        "department-wise": { metrics: [], insights: [], rows: [] },
       };
     }
 
-    const projects = data.projects.map((project) => ({
-      projectCode: project.projectCode || "-",
-      title: project.title,
-      creator: project.creator?.given_name || project.creator?.username || "-",
-      members: formatMembers(project.members),
-      technology: project.technology || "-",
-      assignedGuide:
-        project.assignedGuide?.fullName || project.assignedGuide?.fullname || "Not allocated",
-      phase: formatPhaseLabel(project.currentPhase),
-      status: project.currentPhaseStatus || "pending",
+    const dashboardSummaryRows = [
+      {
+        metric: "Total Projects",
+        value: data.summary.totalProjects,
+        status: "healthy",
+        notes: "All submitted projects in the system.",
+        searchText: "total projects",
+      },
+      {
+        metric: "Allocated Projects",
+        value: data.summary.allocatedProjects,
+        status: "healthy",
+        notes: "Projects already matched with a guide.",
+        searchText: "allocated projects",
+      },
+      {
+        metric: "Unallocated Projects",
+        value: data.summary.unallocatedProjects,
+        status: data.summary.unallocatedProjects > 0 ? "attention" : "healthy",
+        notes: "Projects still waiting for guide allocation.",
+        searchText: "unallocated projects",
+      },
+      {
+        metric: "Active Guides With Work",
+        value: data.summary.totalGuideActivities,
+        status: "healthy",
+        notes: "Guides currently handling at least one project.",
+        searchText: "active guides",
+      },
+      {
+        metric: "Students in Projects",
+        value: data.summary.totalStudentActivities,
+        status: "healthy",
+        notes: "Students currently linked to project work.",
+        searchText: "students in projects",
+      },
+      {
+        metric: "Allocation Alerts",
+        value: data.allocationAlerts.length,
+        status: data.allocationAlerts.length > 0 ? "attention" : "healthy",
+        notes: "Projects needing manual admin allocation support.",
+        searchText: "allocation alerts",
+      },
+    ];
+
+    const studentAllocation = data.studentActivity.map((student) => ({
+      fullName: student.fullName || student.username,
+      username: student.username,
+      class: student.class || "-",
+      division: student.division || "-",
+      rollNumber: student.rollNumber || "-",
+      projectCount: student.projectCount,
+      status: student.isAssigned ? "allocated" : "unassigned",
+      statusLabel: student.isAssigned ? "Allocated" : "Unassigned",
       searchText: [
-        project.title,
-        project.projectCode,
-        project.technology,
-        project.creator?.given_name,
-        project.creator?.username,
-        project.assignedGuide?.fullName,
-        project.assignedGuide?.fullname,
+        student.fullName,
+        student.username,
+        student.class,
+        student.division,
+        student.rollNumber,
       ]
         .join(" ")
         .toLowerCase(),
@@ -236,14 +270,16 @@ export default function ReportsPage() {
       searchText: [guide.fullName, guide.departmentName, guide.username].join(" ").toLowerCase(),
     }));
 
-    const studentParticipation = data.studentActivity.map((student) => ({
+    const unassignedStudents = data.studentActivity
+      .filter((student) => !student.isAssigned)
+      .map((student) => ({
       fullName: student.fullName || student.username,
       username: student.username,
       class: student.class || "-",
       division: student.division || "-",
       rollNumber: student.rollNumber || "-",
-      projectCount: student.projectCount,
-      status: student.isAssigned ? "active" : "inactive",
+      status: "unassigned",
+      statusLabel: "Available for allocation",
       searchText: [
         student.fullName,
         student.username,
@@ -255,62 +291,78 @@ export default function ReportsPage() {
         .toLowerCase(),
     }));
 
-    const allocationAlerts = data.allocationAlerts.map((alert) => ({
-      projectTitle: alert.projectTitle,
-      creatorName: alert.creatorName,
-      preferredGuideName: alert.preferredGuideName || "Not selected",
-      issueCode: alert.issueCode,
-      message: alert.message,
-      status: "attention",
-      searchText: [
-        alert.projectTitle,
-        alert.creatorName,
-        alert.preferredGuideName,
-        alert.issueCode,
-        alert.message,
-      ]
-        .join(" ")
-        .toLowerCase(),
+    const departmentMap = new Map<
+      string,
+      {
+        departmentName: string;
+        guideCount: number;
+        activeGuideCount: number;
+        assignedProjects: number;
+        remainingCapacity: number;
+      }
+    >();
+
+    for (const guide of data.guideActivity) {
+      const key = guide.departmentName || "Unspecified";
+      const current = departmentMap.get(key) ?? {
+        departmentName: key,
+        guideCount: 0,
+        activeGuideCount: 0,
+        assignedProjects: 0,
+        remainingCapacity: 0,
+      };
+
+      current.guideCount += 1;
+      current.activeGuideCount += guide.isActive ? 1 : 0;
+      current.assignedProjects += guide.assignedProjects;
+      current.remainingCapacity += guide.remainingCapacity;
+
+      departmentMap.set(key, current);
+    }
+
+    const departmentWise = Array.from(departmentMap.values()).map((department) => ({
+      ...department,
+      status: department.remainingCapacity === 0 ? "full" : department.assignedProjects > 0 ? "active" : "idle",
+      statusLabel:
+        department.remainingCapacity === 0
+          ? "At capacity"
+          : department.assignedProjects > 0
+            ? "Handling allocations"
+            : "No current load",
+      searchText: department.departmentName.toLowerCase(),
     }));
 
-    const completedSubmissions = data.projects
-      .filter((project) => project.currentPhaseStatus === "completed")
-      .map((project) => ({
-        projectCode: project.projectCode || "-",
-        title: project.title,
-        creator: project.creator?.given_name || project.creator?.username || "-",
-        assignedGuide:
-          project.assignedGuide?.fullName || project.assignedGuide?.fullname || "Not allocated",
-        completedAt: formatDateTime(project.completedAt),
-        finalSubmission: project.finalSubmissionPdf?.fileName || "No PDF uploaded",
-        status: project.finalSubmissionPdf?.fileName ? "available" : "missing",
-        searchText: [
-          project.projectCode,
-          project.title,
-          project.creator?.given_name,
-          project.creator?.username,
-          project.assignedGuide?.fullName,
-          project.assignedGuide?.fullname,
-          project.finalSubmissionPdf?.fileName,
-        ]
-          .join(" ")
-          .toLowerCase(),
-      }));
-
     return {
-      "project-summary": {
+      "dashboard-summary": {
         metrics: [
-          { label: "Projects", value: projects.length },
+          { label: "Projects", value: data.summary.totalProjects },
           { label: "Allocated", value: data.summary.allocatedProjects },
-          { label: "In Progress", value: data.projects.filter((item) => item.currentPhaseStatus === "in_progress").length },
-          { label: "Completed", value: data.projects.filter((item) => item.currentPhaseStatus === "completed").length },
+          { label: "Unallocated", value: data.summary.unallocatedProjects },
+          { label: "Alerts", value: data.allocationAlerts.length },
         ],
         insights: [
           `${data.summary.allocatedProjects} of ${data.summary.totalProjects} projects are already allocated to guides.`,
-          `${data.summary.unallocatedProjects} project${data.summary.unallocatedProjects === 1 ? "" : "s"} still need allocation attention.`,
-          `${data.projects.filter((item) => item.currentPhaseStatus === "completed").length} project${data.projects.filter((item) => item.currentPhaseStatus === "completed").length === 1 ? "" : "s"} have completed the full lifecycle.`,
+          `${data.summary.totalStudentActivities} students are currently involved in project work.`,
+          `${data.allocationAlerts.length} project${data.allocationAlerts.length === 1 ? "" : "s"} need admin attention for allocation issues.`,
         ],
-        rows: projects,
+        rows: dashboardSummaryRows,
+      },
+      "student-allocation": {
+        metrics: [
+          { label: "Students", value: data.studentActivity.length },
+          { label: "Allocated", value: data.studentActivity.filter((student) => student.isAssigned).length },
+          { label: "Unassigned", value: data.studentActivity.filter((student) => !student.isAssigned).length },
+          {
+            label: "Project Links",
+            value: data.studentActivity.reduce((sum, student) => sum + student.projectCount, 0),
+          },
+        ],
+        insights: [
+          `${data.studentActivity.filter((student) => student.isAssigned).length} students are already allocated to projects.`,
+          `${data.studentActivity.filter((student) => !student.isAssigned).length} students are still available for new allocations.`,
+          `${new Set(data.studentActivity.map((student) => `${student.class || "-"}-${student.division || "-"}`)).size} class/division groups are represented in this allocation cycle.`,
+        ],
+        rows: studentAllocation,
       },
       "guide-workload": {
         metrics: [
@@ -334,79 +386,50 @@ export default function ReportsPage() {
         ],
         rows: guideWorkload,
       },
-      "student-participation": {
+      "unassigned-students": {
         metrics: [
-          { label: "Students", value: data.studentActivity.length },
-          { label: "Active in Projects", value: data.studentActivity.filter((student) => student.isAssigned).length },
-          { label: "Without Projects", value: data.studentActivity.filter((student) => !student.isAssigned).length },
-          {
-            label: "Project Links",
-            value: data.studentActivity.reduce((sum, student) => sum + student.projectCount, 0),
-          },
+          { label: "Unassigned", value: unassignedStudents.length },
+          { label: "Total Students", value: data.studentActivity.length },
+          { label: "Allocated Students", value: data.studentActivity.filter((student) => student.isAssigned).length },
+          { label: "Open Project Alerts", value: data.allocationAlerts.length },
         ],
         insights: [
-          `${data.studentActivity.filter((student) => student.isAssigned).length} students are currently attached to at least one project.`,
-          `${data.studentActivity.filter((student) => !student.isAssigned).length} students are still available for new project formation.`,
-          `${new Set(data.studentActivity.map((student) => `${student.class || "-"}-${student.division || "-"}`)).size} class/division groups are represented in the current student list.`,
+          `${unassignedStudents.length} students can still be attached to new or pending projects.`,
+          `${data.summary.unallocatedProjects} projects are unallocated, so these students may be needed soon.`,
+          `${new Set(unassignedStudents.map((student) => `${student.class}-${student.division}`)).size} class/division groups have at least one unassigned student.`,
         ],
-        rows: studentParticipation,
+        rows: unassignedStudents,
       },
-      "allocation-alerts": {
+      "department-wise": {
         metrics: [
-          { label: "Open Alerts", value: data.allocationAlerts.length },
-          {
-            label: "No Active Guide",
-            value: data.allocationAlerts.filter((alert) => alert.issueCode === "noActiveGuides").length,
-          },
-          {
-            label: "Capacity Exhausted",
-            value: data.allocationAlerts.filter((alert) => alert.issueCode === "noCapacity").length,
-          },
-          {
-            label: "Review Required",
-            value: data.allocationAlerts.length,
-          },
+          { label: "Departments", value: departmentWise.length },
+          { label: "Guides", value: data.guideActivity.length },
+          { label: "Assigned Projects", value: departmentWise.reduce((sum, row) => sum + Number(row.assignedProjects), 0) },
+          { label: "Remaining Capacity", value: departmentWise.reduce((sum, row) => sum + Number(row.remainingCapacity), 0) },
         ],
         insights: [
-          data.allocationAlerts.length
-            ? `${data.allocationAlerts.length} projects are waiting for manual allocation support from admin.`
-            : "There are no active allocation alerts right now.",
-          `${data.allocationAlerts.filter((alert) => alert.preferredGuideName).length} alert${data.allocationAlerts.filter((alert) => alert.preferredGuideName).length === 1 ? "" : "s"} include a preferred guide choice.`,
-          `${data.summary.unallocatedProjects} projects remain unallocated across the system.`,
+          `${departmentWise.length} departments are represented across guide profiles.`,
+          `${departmentWise.filter((department) => department.status === "full").length} department${departmentWise.filter((department) => department.status === "full").length === 1 ? "" : "s"} are currently at full capacity.`,
+          `${departmentWise.reduce((sum, row) => sum + Number(row.assignedProjects), 0)} project allocations are distributed across departments.`,
         ],
-        rows: allocationAlerts,
-      },
-      "completed-submissions": {
-        metrics: [
-          { label: "Completed Projects", value: completedSubmissions.length },
-          {
-            label: "PDF Available",
-            value: completedSubmissions.filter((project) => project.status === "available").length,
-          },
-          {
-            label: "Missing PDF",
-            value: completedSubmissions.filter((project) => project.status === "missing").length,
-          },
-          { label: "Completion Rate", value: `${data.summary.totalProjects ? Math.round((completedSubmissions.length / data.summary.totalProjects) * 100) : 0}%` },
-        ],
-        insights: [
-          `${completedSubmissions.length} projects have been marked as completed.`,
-          `${completedSubmissions.filter((project) => project.status === "available").length} completed project${completedSubmissions.filter((project) => project.status === "available").length === 1 ? "" : "s"} already have a final submission file.`,
-          `${completedSubmissions.filter((project) => project.status === "missing").length} completed project${completedSubmissions.filter((project) => project.status === "missing").length === 1 ? "" : "s"} still need a final submission document.`,
-        ],
-        rows: completedSubmissions,
+        rows: departmentWise,
       },
     };
   }, [data]);
 
   const statusOptions = useMemo(() => {
     switch (selectedReport) {
-      case "project-summary":
+      case "dashboard-summary":
         return [
-          { value: "all", label: "All statuses" },
-          { value: "pending", label: "Pending" },
-          { value: "in_progress", label: "In Progress" },
-          { value: "completed", label: "Completed" },
+          { value: "all", label: "All metrics" },
+          { value: "healthy", label: "Healthy" },
+          { value: "attention", label: "Attention" },
+        ];
+      case "student-allocation":
+        return [
+          { value: "all", label: "All students" },
+          { value: "allocated", label: "Allocated" },
+          { value: "unassigned", label: "Unassigned" },
         ];
       case "guide-workload":
         return [
@@ -414,22 +437,17 @@ export default function ReportsPage() {
           { value: "active", label: "Active" },
           { value: "inactive", label: "Inactive" },
         ];
-      case "student-participation":
+      case "unassigned-students":
         return [
-          { value: "all", label: "All students" },
-          { value: "active", label: "Active in project" },
-          { value: "inactive", label: "No project" },
+          { value: "all", label: "All unassigned students" },
+          { value: "unassigned", label: "Available for allocation" },
         ];
-      case "allocation-alerts":
+      case "department-wise":
         return [
-          { value: "all", label: "All alerts" },
-          { value: "attention", label: "Needs attention" },
-        ];
-      case "completed-submissions":
-        return [
-          { value: "all", label: "All submissions" },
-          { value: "available", label: "PDF available" },
-          { value: "missing", label: "PDF missing" },
+          { value: "all", label: "All departments" },
+          { value: "active", label: "Handling allocations" },
+          { value: "full", label: "At capacity" },
+          { value: "idle", label: "No current load" },
         ];
     }
   }, [selectedReport]);
@@ -448,6 +466,10 @@ export default function ReportsPage() {
   }, [generatedReports, search, selectedReport, statusFilter]);
 
   const reportOutput = generatedReports[selectedReport];
+
+  if (!isValidReport) {
+    return <Navigate to="/admin/reports/dashboard-summary" replace />;
+  }
 
   if (isLoading) {
     return <div className="py-16 text-center text-slate-500">Loading reports...</div>;
@@ -482,34 +504,19 @@ export default function ReportsPage() {
           <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center gap-2">
               <FiFileText className="text-slate-500" />
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Report Templates</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Selected Report</h2>
             </div>
-            <div className="mt-4 space-y-3">
-              {REPORT_CONFIGS.map((report) => {
-                const isActive = report.id === selectedReport;
-
-                return (
-                  <button
-                    key={report.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedReport(report.id);
-                      setStatusFilter("all");
-                      setSearch("");
-                    }}
-                    className={`w-full rounded-3xl border p-4 text-left transition ${
-                      isActive
-                        ? "border-slate-900 bg-slate-900 text-white dark:border-slate-200 dark:bg-slate-100 dark:text-slate-950"
-                        : "border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <p className="text-sm font-semibold">{report.title}</p>
-                    <p className={`mt-2 text-xs leading-5 ${isActive ? "text-white/75 dark:text-slate-600" : "text-slate-500 dark:text-slate-400"}`}>
-                      {report.description}
-                    </p>
-                  </button>
-                );
-              })}
+            <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950">
+              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{activeReport.eyebrow}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                {activeReport.title}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                {activeReport.description}
+              </p>
+              <p className="mt-4 text-xs text-slate-400">
+                Choose another report from the sidebar dropdown.
+              </p>
             </div>
           </div>
 

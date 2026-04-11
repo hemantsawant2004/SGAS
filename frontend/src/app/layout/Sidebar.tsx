@@ -2,7 +2,8 @@ import React from "react";
 import { navItemAdmin } from "../config/sidebarMenus";
 import { navIteGuide } from "../config/sidebarMenus";
 import { navStudent } from "../config/sidebarMenus";
-import { NavLink } from "react-router-dom";
+import type { SidebarNavItem } from "../config/sidebarMenus";
+import { NavLink, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { toggleMode } from "../../features/theme/themeSlice";
@@ -27,6 +28,7 @@ function Sidebar({
   const navigate = useNavigate();
   const theme = useAppSelector((s) => s.theme.mode);
   const { data: notificationsData } = useNotifications();
+  const location = useLocation();
   const navItems =
     userRole === "admin"
       ? navItemAdmin
@@ -68,30 +70,16 @@ function Sidebar({
             </div>
 
             <nav className="flex-1 space-y-2 px-3">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === "/app"}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `group flex items-center gap-4 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? "bg-gray-400 text-white shadow-lg shadow-indigo-500/20"
-                          : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
-                      }`
-                    }
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-700/50 transition-all group-hover:bg-indigo-500/20">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <span>{item.label}</span>
-                  </NavLink>
-                );
-              })}
+              {navItems.map((item) => (
+                <SidebarItem
+                  key={item.to}
+                  item={item}
+                  sidebarOpen
+                  isMobile
+                  currentPath={location.pathname}
+                  onNavigate={() => setMobileMenuOpen(false)}
+                />
+              ))}
             </nav>
 
             <div className="border-t border-slate-700/70 px-3 pt-4">
@@ -158,57 +146,14 @@ function Sidebar({
   `}
       >
         <nav className="flex-1 px-3 space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/app"}
-                className={({ isActive }) =>
-                  `
-            group relative flex items-center gap-4
-            rounded-xl px-3 py-2.5
-            text-sm font-medium
-            transition-all duration-200
-            ${isActive
-                    ? "bg-gray-400 text-white shadow-lg shadow-indigo-500/20"
-                    : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
-                  }
-            `
-                }
-              >
-                {/* Icon */}
-                <div
-                  className={`
-              flex h-9 w-9 items-center justify-center
-              rounded-lg transition-all
-              ${sidebarOpen
-                      ? "bg-slate-700/50"
-                      : "bg-transparent"
-                    }
-              group-hover:bg-indigo-500/20
-            `}
-                >
-                  <Icon className="h-5 w-5" />
-                </div>
-
-                {/* Label */}
-                <span
-                  className={`
-              whitespace-nowrap transition-all duration-300
-              ${sidebarOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"}
-            `}
-                >
-                  {item.label}
-                </span>
-
-                {/* Active Indicator Line */}
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-indigo-500 opacity-0 group-[.active]:opacity-100" />
-              </NavLink>
-            );
-          })}
+          {navItems.map((item) => (
+            <SidebarItem
+              key={item.to}
+              item={item}
+              sidebarOpen={Boolean(sidebarOpen)}
+              currentPath={location.pathname}
+            />
+          ))}
         </nav>
       </aside>
 
@@ -250,3 +195,126 @@ function Sidebar({
 }
 
 export default Sidebar;
+
+function SidebarItem({
+  item,
+  sidebarOpen,
+  currentPath,
+  isMobile = false,
+  onNavigate,
+}: {
+  item: SidebarNavItem;
+  sidebarOpen: boolean;
+  currentPath: string;
+  isMobile?: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+  const hasChildren = Boolean(item.children?.length);
+  const isGroupActive =
+    currentPath === item.to || Boolean(item.children?.some((child) => currentPath.startsWith(child.to)));
+  const [isExpanded, setIsExpanded] = React.useState(isGroupActive);
+
+  React.useEffect(() => {
+    if (isGroupActive) {
+      setIsExpanded(true);
+    }
+  }, [isGroupActive]);
+
+  if (!hasChildren) {
+    return (
+      <NavLink
+        to={item.to}
+        end={item.to === "/app"}
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          `group relative flex items-center gap-4 rounded-xl px-3 ${
+            isMobile ? "py-3" : "py-2.5"
+          } text-sm font-medium transition-all duration-200 ${
+            isActive
+              ? "bg-gray-400 text-white shadow-lg shadow-indigo-500/20"
+              : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
+          }`
+        }
+      >
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
+            sidebarOpen ? "bg-slate-700/50" : "bg-transparent"
+          } group-hover:bg-indigo-500/20`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+        <span
+          className={`whitespace-nowrap transition-all duration-300 ${
+            sidebarOpen || isMobile ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
+          }`}
+        >
+          {item.label}
+        </span>
+      </NavLink>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={() => setIsExpanded((value) => !value)}
+        className={`group flex w-full items-center gap-4 rounded-xl px-3 ${
+          isMobile ? "py-3" : "py-2.5"
+        } text-sm font-medium transition-all duration-200 ${
+          isGroupActive
+            ? "bg-slate-700/70 text-white"
+            : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
+        }`}
+      >
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
+            sidebarOpen ? "bg-slate-700/50" : "bg-transparent"
+          } group-hover:bg-indigo-500/20`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+        <span
+          className={`whitespace-nowrap transition-all duration-300 ${
+            sidebarOpen || isMobile ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
+          }`}
+        >
+          {item.label}
+        </span>
+        {(sidebarOpen || isMobile) && (
+          <svg
+            className={`ml-auto h-4 w-4 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M9 6l6 6-6 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
+
+      {isExpanded && (sidebarOpen || isMobile) ? (
+        <div className="ml-5 space-y-1 border-l border-slate-700/70 pl-4">
+          {item.children?.map((child) => (
+            <NavLink
+              key={child.to}
+              to={child.to}
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
+                  isActive
+                    ? "bg-indigo-500/20 text-white"
+                    : "text-slate-400 hover:bg-slate-700/50 hover:text-white"
+                }`
+              }
+            >
+              <child.icon className="h-4 w-4" />
+              <span>{child.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
