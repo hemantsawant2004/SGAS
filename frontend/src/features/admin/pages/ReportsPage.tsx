@@ -668,8 +668,12 @@ function ReportChart({ type, data }: { type: ChartType; data: ChartDatum[] }) {
         ))}
       </svg>
       <div className="space-y-3">
-        {data.map((item) => (
-          <div key={item.label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950">
+        {data.map((item, index) => (
+          <div
+            key={item.label}
+            className="reports-pie-legend flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950"
+            style={{ animationDelay: `${index * 90 + 180}ms` } as CSSProperties}
+          >
             <div className="flex items-center gap-3">
               <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
               <span className="text-sm text-slate-700 dark:text-slate-200">{item.label}</span>
