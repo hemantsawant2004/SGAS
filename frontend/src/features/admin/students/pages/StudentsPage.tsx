@@ -55,7 +55,7 @@ export default function StudentsPage() {
           Swipe horizontally to view the student table.
         </div>
         <div className="overflow-x-auto overscroll-x-contain">
-        <table className="min-w-[420px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
+        <table className="divide-y divide-slate-200 text-sm dark:divide-slate-800">
           <thead className="bg-slate-50 dark:bg-slate-950">
             <tr>
               {/* <th className="px-5 py-4 text-left font-medium text-slate-500">ID</th> */}
