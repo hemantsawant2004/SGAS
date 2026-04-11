@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiCalendar, FiDownload, FiFileText, FiFilter, FiPrinter } from "react-icons/fi";
+import { FiDownload, FiFilter, FiPrinter, FiSearch } from "react-icons/fi";
 import { Navigate, useParams } from "react-router-dom";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 
@@ -10,48 +10,44 @@ type ReportType =
   | "unassigned-students"
   | "department-wise";
 
-type ReportRow = Record<string, string | number>;
+type ChartType = "bar" | "line" | "pie";
 
-interface ReportMetric {
-  label: string;
-  value: string | number;
-}
+type ReportRow = Record<string, string | number>;
 
 interface ReportConfig {
   id: ReportType;
   title: string;
-  eyebrow: string;
-  description: string;
-  tone: string;
   columns: { key: string; label: string }[];
+  chartType: ChartType;
+}
+
+interface ChartDatum {
+  label: string;
+  value: number;
+  color: string;
 }
 
 interface GeneratedReport {
-  metrics: ReportMetric[];
-  insights: string[];
   rows: ReportRow[];
+  chartData: ChartDatum[];
 }
 
 const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "dashboard-summary",
-    title: "Dashboard Summary Report",
-    eyebrow: "Overview",
-    description: "See the overall project, guide, student, and allocation health of the system in one report.",
-    tone: "from-slate-950 via-slate-900 to-slate-800",
+    title: "Dashboard Summary",
+    chartType: "pie",
     columns: [
       { key: "metric", label: "Metric" },
       { key: "value", label: "Value" },
-      { key: "status", label: "Status" },
+      { key: "statusLabel", label: "Status" },
       { key: "notes", label: "Notes" },
     ],
   },
   {
     id: "student-allocation",
     title: "Student Allocation Report",
-    eyebrow: "Allocation",
-    description: "Track which students are allocated to projects and how many project links each student has.",
-    tone: "from-emerald-700 via-teal-700 to-cyan-700",
+    chartType: "bar",
     columns: [
       { key: "fullName", label: "Student" },
       { key: "username", label: "Username" },
@@ -65,13 +61,11 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "guide-workload",
     title: "Guide Workload Report",
-    eyebrow: "Capacity",
-    description: "Review guide allocation load, active status, and capacity distribution across the system.",
-    tone: "from-amber-700 via-orange-600 to-rose-600",
+    chartType: "line",
     columns: [
       { key: "fullName", label: "Guide" },
       { key: "departmentName", label: "Department" },
-      { key: "status", label: "Status" },
+      { key: "statusLabel", label: "Status" },
       { key: "assignedProjects", label: "Assigned" },
       { key: "maxProjects", label: "Capacity" },
       { key: "remainingCapacity", label: "Remaining" },
@@ -81,9 +75,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "unassigned-students",
     title: "Unassigned Students Report",
-    eyebrow: "Availability",
-    description: "List all students who are not currently attached to any project so they can be allocated quickly.",
-    tone: "from-red-700 via-rose-700 to-orange-700",
+    chartType: "bar",
     columns: [
       { key: "fullName", label: "Student" },
       { key: "username", label: "Username" },
@@ -96,9 +88,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "department-wise",
     title: "Department-wise Report",
-    eyebrow: "Departments",
-    description: "View project allocation and guide capacity grouped by department for department-level monitoring.",
-    tone: "from-indigo-700 via-blue-700 to-sky-700",
+    chartType: "pie",
     columns: [
       { key: "departmentName", label: "Department" },
       { key: "guideCount", label: "Guides" },
@@ -110,20 +100,9 @@ const REPORT_CONFIGS: ReportConfig[] = [
   },
 ];
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) return "-";
+const PAGE_SIZE = 8;
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-};
+const CHART_COLORS = ["#0f766e", "#f59e0b", "#2563eb", "#dc2626", "#7c3aed", "#0891b2"];
 
 const toCsvValue = (value: string | number) => {
   const normalized = String(value ?? "");
@@ -134,17 +113,10 @@ const toCsvValue = (value: string | number) => {
   return normalized;
 };
 
-const buildCsv = (columns: { key: string; label: string }[], rows: ReportRow[]) => {
-  const header = columns.map((column) => toCsvValue(column.label)).join(",");
-  const body = rows.map((row) =>
-    columns.map((column) => toCsvValue(row[column.key] ?? "")).join(",")
-  );
-
-  return [header, ...body].join("\n");
-};
-
 const downloadCsv = (fileName: string, columns: { key: string; label: string }[], rows: ReportRow[]) => {
-  const csv = buildCsv(columns, rows);
+  const header = columns.map((column) => toCsvValue(column.label)).join(",");
+  const body = rows.map((row) => columns.map((column) => toCsvValue(row[column.key] ?? "")).join(","));
+  const csv = [header, ...body].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -156,7 +128,6 @@ const downloadCsv = (fileName: string, columns: { key: string; label: string }[]
 
 const getWorkloadBand = (assignedProjects: number, maxProjects: number) => {
   if (maxProjects <= 0) return "No capacity set";
-
   const ratio = assignedProjects / maxProjects;
   if (ratio >= 1) return "Full";
   if (ratio >= 0.7) return "High";
@@ -170,127 +141,31 @@ export default function ReportsPage() {
   const { data, isLoading, isError } = useAdminOverview();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [generatedAt, setGeneratedAt] = useState(() => new Date().toISOString());
-  const selectedReport = (reportType as ReportType) || "dashboard-summary";
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const selectedReport = (reportType as ReportType) || "dashboard-summary";
   const isValidReport = REPORT_CONFIGS.some((report) => report.id === selectedReport);
+  const activeReport = REPORT_CONFIGS.find((report) => report.id === selectedReport) ?? REPORT_CONFIGS[0];
 
   useEffect(() => {
     setSearch("");
     setStatusFilter("all");
-    setGeneratedAt(new Date().toISOString());
+    setCurrentPage(1);
   }, [selectedReport]);
-
-  const activeReport = REPORT_CONFIGS.find((report) => report.id === selectedReport) ?? REPORT_CONFIGS[0];
 
   const generatedReports = useMemo<Record<ReportType, GeneratedReport>>(() => {
     if (!data) {
       return {
-        "dashboard-summary": { metrics: [], insights: [], rows: [] },
-        "student-allocation": { metrics: [], insights: [], rows: [] },
-        "guide-workload": { metrics: [], insights: [], rows: [] },
-        "unassigned-students": { metrics: [], insights: [], rows: [] },
-        "department-wise": { metrics: [], insights: [], rows: [] },
+        "dashboard-summary": { rows: [], chartData: [] },
+        "student-allocation": { rows: [], chartData: [] },
+        "guide-workload": { rows: [], chartData: [] },
+        "unassigned-students": { rows: [], chartData: [] },
+        "department-wise": { rows: [], chartData: [] },
       };
     }
 
-    const dashboardSummaryRows = [
-      {
-        metric: "Total Projects",
-        value: data.summary.totalProjects,
-        status: "healthy",
-        notes: "All submitted projects in the system.",
-        searchText: "total projects",
-      },
-      {
-        metric: "Allocated Projects",
-        value: data.summary.allocatedProjects,
-        status: "healthy",
-        notes: "Projects already matched with a guide.",
-        searchText: "allocated projects",
-      },
-      {
-        metric: "Unallocated Projects",
-        value: data.summary.unallocatedProjects,
-        status: data.summary.unallocatedProjects > 0 ? "attention" : "healthy",
-        notes: "Projects still waiting for guide allocation.",
-        searchText: "unallocated projects",
-      },
-      {
-        metric: "Active Guides With Work",
-        value: data.summary.totalGuideActivities,
-        status: "healthy",
-        notes: "Guides currently handling at least one project.",
-        searchText: "active guides",
-      },
-      {
-        metric: "Students in Projects",
-        value: data.summary.totalStudentActivities,
-        status: "healthy",
-        notes: "Students currently linked to project work.",
-        searchText: "students in projects",
-      },
-      {
-        metric: "Allocation Alerts",
-        value: data.allocationAlerts.length,
-        status: data.allocationAlerts.length > 0 ? "attention" : "healthy",
-        notes: "Projects needing manual admin allocation support.",
-        searchText: "allocation alerts",
-      },
-    ];
-
-    const studentAllocation = data.studentActivity.map((student) => ({
-      fullName: student.fullName || student.username,
-      username: student.username,
-      class: student.class || "-",
-      division: student.division || "-",
-      rollNumber: student.rollNumber || "-",
-      projectCount: student.projectCount,
-      status: student.isAssigned ? "allocated" : "unassigned",
-      statusLabel: student.isAssigned ? "Allocated" : "Unassigned",
-      searchText: [
-        student.fullName,
-        student.username,
-        student.class,
-        student.division,
-        student.rollNumber,
-      ]
-        .join(" ")
-        .toLowerCase(),
-    }));
-
-    const guideWorkload = data.guideActivity.map((guide) => ({
-      fullName: guide.fullName,
-      departmentName: guide.departmentName || "-",
-      status: guide.isActive ? "active" : "inactive",
-      assignedProjects: guide.assignedProjects,
-      maxProjects: guide.maxProjects,
-      remainingCapacity: guide.remainingCapacity,
-      workloadBand: getWorkloadBand(guide.assignedProjects, guide.maxProjects),
-      searchText: [guide.fullName, guide.departmentName, guide.username].join(" ").toLowerCase(),
-    }));
-
-    const unassignedStudents = data.studentActivity
-      .filter((student) => !student.isAssigned)
-      .map((student) => ({
-      fullName: student.fullName || student.username,
-      username: student.username,
-      class: student.class || "-",
-      division: student.division || "-",
-      rollNumber: student.rollNumber || "-",
-      status: "unassigned",
-      statusLabel: "Available for allocation",
-      searchText: [
-        student.fullName,
-        student.username,
-        student.class,
-        student.division,
-        student.rollNumber,
-      ]
-        .join(" ")
-        .toLowerCase(),
-    }));
-
+    const allocatedStudents = data.studentActivity.filter((student) => student.isAssigned).length;
+    const unassignedStudentsCount = data.studentActivity.filter((student) => !student.isAssigned).length;
     const departmentMap = new Map<
       string,
       {
@@ -311,16 +186,14 @@ export default function ReportsPage() {
         assignedProjects: 0,
         remainingCapacity: 0,
       };
-
       current.guideCount += 1;
       current.activeGuideCount += guide.isActive ? 1 : 0;
       current.assignedProjects += guide.assignedProjects;
       current.remainingCapacity += guide.remainingCapacity;
-
       departmentMap.set(key, current);
     }
 
-    const departmentWise = Array.from(departmentMap.values()).map((department) => ({
+    const departmentRows = Array.from(departmentMap.values()).map((department) => ({
       ...department,
       status: department.remainingCapacity === 0 ? "full" : department.assignedProjects > 0 ? "active" : "idle",
       statusLabel:
@@ -334,85 +207,141 @@ export default function ReportsPage() {
 
     return {
       "dashboard-summary": {
-        metrics: [
-          { label: "Projects", value: data.summary.totalProjects },
-          { label: "Allocated", value: data.summary.allocatedProjects },
-          { label: "Unallocated", value: data.summary.unallocatedProjects },
-          { label: "Alerts", value: data.allocationAlerts.length },
+        rows: [
+          {
+            metric: "Total Projects",
+            value: data.summary.totalProjects,
+            status: "neutral",
+            statusLabel: "Tracked",
+            notes: "All projects in the system.",
+            searchText: "total projects tracked",
+          },
+          {
+            metric: "Allocated Projects",
+            value: data.summary.allocatedProjects,
+            status: "healthy",
+            statusLabel: "Healthy",
+            notes: "Projects already assigned to guides.",
+            searchText: "allocated projects healthy",
+          },
+          {
+            metric: "Unallocated Projects",
+            value: data.summary.unallocatedProjects,
+            status: data.summary.unallocatedProjects > 0 ? "attention" : "healthy",
+            statusLabel: data.summary.unallocatedProjects > 0 ? "Attention" : "Healthy",
+            notes: "Projects waiting for allocation.",
+            searchText: "unallocated projects attention",
+          },
+          {
+            metric: "Students in Projects",
+            value: data.summary.totalStudentActivities,
+            status: "healthy",
+            statusLabel: "Active",
+            notes: "Students linked to projects.",
+            searchText: "students in projects active",
+          },
+          {
+            metric: "Guide Activity",
+            value: data.summary.totalGuideActivities,
+            status: "healthy",
+            statusLabel: "Active",
+            notes: "Guides currently handling work.",
+            searchText: "guide activity active",
+          },
         ],
-        insights: [
-          `${data.summary.allocatedProjects} of ${data.summary.totalProjects} projects are already allocated to guides.`,
-          `${data.summary.totalStudentActivities} students are currently involved in project work.`,
-          `${data.allocationAlerts.length} project${data.allocationAlerts.length === 1 ? "" : "s"} need admin attention for allocation issues.`,
+        chartData: [
+          { label: "Allocated", value: data.summary.allocatedProjects, color: CHART_COLORS[0] },
+          { label: "Unallocated", value: data.summary.unallocatedProjects, color: CHART_COLORS[3] },
+          { label: "Students Active", value: data.summary.totalStudentActivities, color: CHART_COLORS[2] },
         ],
-        rows: dashboardSummaryRows,
       },
       "student-allocation": {
-        metrics: [
-          { label: "Students", value: data.studentActivity.length },
-          { label: "Allocated", value: data.studentActivity.filter((student) => student.isAssigned).length },
-          { label: "Unassigned", value: data.studentActivity.filter((student) => !student.isAssigned).length },
-          {
-            label: "Project Links",
-            value: data.studentActivity.reduce((sum, student) => sum + student.projectCount, 0),
-          },
+        rows: data.studentActivity.map((student) => ({
+          fullName: student.fullName || student.username,
+          username: student.username,
+          class: student.class || "-",
+          division: student.division || "-",
+          rollNumber: student.rollNumber || "-",
+          projectCount: student.projectCount,
+          status: student.isAssigned ? "allocated" : "unassigned",
+          statusLabel: student.isAssigned ? "Allocated" : "Unassigned",
+          searchText: [
+            student.fullName,
+            student.username,
+            student.class,
+            student.division,
+            student.rollNumber,
+          ]
+            .join(" ")
+            .toLowerCase(),
+        })),
+        chartData: [
+          { label: "Allocated", value: allocatedStudents, color: CHART_COLORS[0] },
+          { label: "Unassigned", value: unassignedStudentsCount, color: CHART_COLORS[3] },
         ],
-        insights: [
-          `${data.studentActivity.filter((student) => student.isAssigned).length} students are already allocated to projects.`,
-          `${data.studentActivity.filter((student) => !student.isAssigned).length} students are still available for new allocations.`,
-          `${new Set(data.studentActivity.map((student) => `${student.class || "-"}-${student.division || "-"}`)).size} class/division groups are represented in this allocation cycle.`,
-        ],
-        rows: studentAllocation,
       },
       "guide-workload": {
-        metrics: [
-          { label: "Guides", value: data.guideActivity.length },
-          { label: "Active Guides", value: data.guideActivity.filter((guide) => guide.isActive).length },
-          {
-            label: "Near Capacity",
-            value: data.guideActivity.filter(
-              (guide) => guide.maxProjects > 0 && guide.assignedProjects / guide.maxProjects >= 0.7
-            ).length,
-          },
-          {
-            label: "Remaining Slots",
-            value: data.guideActivity.reduce((sum, guide) => sum + guide.remainingCapacity, 0),
-          },
-        ],
-        insights: [
-          `${data.guideActivity.filter((guide) => guide.isActive).length} guides are active in the current cycle.`,
-          `${data.guideActivity.filter((guide) => guide.remainingCapacity === 0 && guide.maxProjects > 0).length} guides have reached full capacity.`,
-          `${data.guideActivity.reduce((sum, guide) => sum + guide.assignedProjects, 0)} total guide allocations are being managed right now.`,
-        ],
-        rows: guideWorkload,
+        rows: data.guideActivity.map((guide) => ({
+          fullName: guide.fullName,
+          departmentName: guide.departmentName || "-",
+          status: guide.isActive ? "active" : "inactive",
+          statusLabel: guide.isActive ? "Active" : "Inactive",
+          assignedProjects: guide.assignedProjects,
+          maxProjects: guide.maxProjects,
+          remainingCapacity: guide.remainingCapacity,
+          workloadBand: getWorkloadBand(guide.assignedProjects, guide.maxProjects),
+          searchText: [guide.fullName, guide.departmentName, guide.username].join(" ").toLowerCase(),
+        })),
+        chartData: data.guideActivity.slice(0, 8).map((guide, index) => ({
+          label: guide.fullName,
+          value: guide.assignedProjects,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        })),
       },
       "unassigned-students": {
-        metrics: [
-          { label: "Unassigned", value: unassignedStudents.length },
-          { label: "Total Students", value: data.studentActivity.length },
-          { label: "Allocated Students", value: data.studentActivity.filter((student) => student.isAssigned).length },
-          { label: "Open Project Alerts", value: data.allocationAlerts.length },
-        ],
-        insights: [
-          `${unassignedStudents.length} students can still be attached to new or pending projects.`,
-          `${data.summary.unallocatedProjects} projects are unallocated, so these students may be needed soon.`,
-          `${new Set(unassignedStudents.map((student) => `${student.class}-${student.division}`)).size} class/division groups have at least one unassigned student.`,
-        ],
-        rows: unassignedStudents,
+        rows: data.studentActivity
+          .filter((student) => !student.isAssigned)
+          .map((student) => ({
+            fullName: student.fullName || student.username,
+            username: student.username,
+            class: student.class || "-",
+            division: student.division || "-",
+            rollNumber: student.rollNumber || "-",
+            status: "unassigned",
+            statusLabel: "Available",
+            searchText: [
+              student.fullName,
+              student.username,
+              student.class,
+              student.division,
+              student.rollNumber,
+            ]
+              .join(" ")
+              .toLowerCase(),
+          })),
+        chartData: Array.from(
+          data.studentActivity
+            .filter((student) => !student.isAssigned)
+            .reduce((acc, student) => {
+              const key = `${student.class || "-"} ${student.division || "-"}`.trim();
+              acc.set(key, (acc.get(key) ?? 0) + 1);
+              return acc;
+            }, new Map<string, number>())
+        )
+          .slice(0, 8)
+          .map(([label, value], index) => ({
+            label,
+            value,
+            color: CHART_COLORS[index % CHART_COLORS.length],
+          })),
       },
       "department-wise": {
-        metrics: [
-          { label: "Departments", value: departmentWise.length },
-          { label: "Guides", value: data.guideActivity.length },
-          { label: "Assigned Projects", value: departmentWise.reduce((sum, row) => sum + Number(row.assignedProjects), 0) },
-          { label: "Remaining Capacity", value: departmentWise.reduce((sum, row) => sum + Number(row.remainingCapacity), 0) },
-        ],
-        insights: [
-          `${departmentWise.length} departments are represented across guide profiles.`,
-          `${departmentWise.filter((department) => department.status === "full").length} department${departmentWise.filter((department) => department.status === "full").length === 1 ? "" : "s"} are currently at full capacity.`,
-          `${departmentWise.reduce((sum, row) => sum + Number(row.assignedProjects), 0)} project allocations are distributed across departments.`,
-        ],
-        rows: departmentWise,
+        rows: departmentRows,
+        chartData: departmentRows.map((department, index) => ({
+          label: department.departmentName,
+          value: Number(department.assignedProjects),
+          color: CHART_COLORS[index % CHART_COLORS.length],
+        })),
       },
     };
   }, [data]);
@@ -421,30 +350,31 @@ export default function ReportsPage() {
     switch (selectedReport) {
       case "dashboard-summary":
         return [
-          { value: "all", label: "All metrics" },
+          { value: "all", label: "All" },
           { value: "healthy", label: "Healthy" },
           { value: "attention", label: "Attention" },
+          { value: "neutral", label: "Neutral" },
         ];
       case "student-allocation":
         return [
-          { value: "all", label: "All students" },
+          { value: "all", label: "All" },
           { value: "allocated", label: "Allocated" },
           { value: "unassigned", label: "Unassigned" },
         ];
       case "guide-workload":
         return [
-          { value: "all", label: "All guides" },
+          { value: "all", label: "All" },
           { value: "active", label: "Active" },
           { value: "inactive", label: "Inactive" },
         ];
       case "unassigned-students":
         return [
-          { value: "all", label: "All unassigned students" },
-          { value: "unassigned", label: "Available for allocation" },
+          { value: "all", label: "All" },
+          { value: "unassigned", label: "Available" },
         ];
       case "department-wise":
         return [
-          { value: "all", label: "All departments" },
+          { value: "all", label: "All" },
           { value: "active", label: "Handling allocations" },
           { value: "full", label: "At capacity" },
           { value: "idle", label: "No current load" },
@@ -452,7 +382,7 @@ export default function ReportsPage() {
     }
   }, [selectedReport]);
 
-  const displayedRows = useMemo(() => {
+  const filteredRows = useMemo(() => {
     const rows = generatedReports[selectedReport]?.rows ?? [];
     const normalizedSearch = search.trim().toLowerCase();
 
@@ -460,12 +390,17 @@ export default function ReportsPage() {
       const matchesSearch =
         !normalizedSearch || String(row.searchText ?? "").includes(normalizedSearch);
       const matchesStatus = statusFilter === "all" || String(row.status ?? "") === statusFilter;
-
       return matchesSearch && matchesStatus;
     });
   }, [generatedReports, search, selectedReport, statusFilter]);
 
-  const reportOutput = generatedReports[selectedReport];
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const paginatedRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const chartData = generatedReports[selectedReport]?.chartData ?? [];
 
   if (!isValidReport) {
     return <Navigate to="/admin/reports/dashboard-summary" replace />;
@@ -481,210 +416,132 @@ export default function ReportsPage() {
 
   return (
     <section className="space-y-6">
-      <div className={`overflow-hidden rounded-[2rem] bg-gradient-to-br ${activeReport.tone} p-6 text-white shadow-xl sm:p-8`}>
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-white/70">{activeReport.eyebrow}</p>
-            <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{activeReport.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80">
-              {activeReport.description}
-            </p>
+      <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{activeReport.title}</h1>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                downloadCsv(
+                  `${selectedReport}-${new Date().toISOString().slice(0, 10)}.csv`,
+                  activeReport.columns,
+                  filteredRows
+                )
+              }
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <FiDownload />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <FiPrinter />
+              Print
+            </button>
           </div>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <HeroStat label="Total Projects" value={data.summary.totalProjects} />
-            <HeroStat label="Open Alerts" value={data.allocationAlerts.length} />
-            <HeroStat label="Generated" value={formatDateTime(generatedAt)} />
+        <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px_160px]">
+          <label className="relative block">
+            <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
+            />
+          </label>
+
+          <label className="relative block">
+            <FiFilter className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+            {filteredRows.length} rows
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="space-y-4">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-2">
-              <FiFileText className="text-slate-500" />
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Selected Report</h2>
-            </div>
-            <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{activeReport.eyebrow}</p>
-              <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
-                {activeReport.title}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {activeReport.description}
-              </p>
-              <p className="mt-4 text-xs text-slate-400">
-                Choose another report from the sidebar dropdown.
-              </p>
-            </div>
-          </div>
+      <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Analytics</h2>
+        </div>
+        <ReportChart type={activeReport.chartType} data={chartData} />
+      </div>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-2">
-              <FiFilter className="text-slate-500" />
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Filters</h2>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div>
-                <label className="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
-                  Search
-                </label>
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search this report"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
-                  Status
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
-                >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setGeneratedAt(new Date().toISOString())}
-                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
-              >
-                Generate Report
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <div className="space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Generated Output</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
-                  {activeReport.title}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Built from current admin data. Use filters to refine the preview before exporting.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    downloadCsv(
-                      `${selectedReport}-${new Date().toISOString().slice(0, 10)}.csv`,
-                      activeReport.columns,
-                      displayedRows
-                    )
-                  }
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <FiDownload />
-                  Export CSV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <FiPrinter />
-                  Print
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
-              <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 dark:bg-slate-800">
-                <FiCalendar />
-                Generated on {formatDateTime(generatedAt)}
-              </span>
-              <span className="rounded-full bg-slate-100 px-3 py-2 dark:bg-slate-800">
-                {displayedRows.length} record{displayedRows.length === 1 ? "" : "s"} in preview
-              </span>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {reportOutput.metrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-              >
-                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{metric.label}</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{metric.value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            {reportOutput.insights.map((insight, index) => (
-              <article
-                key={`${selectedReport}-insight-${index}`}
-                className="rounded-[1.75rem] border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-5 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-950"
-              >
-                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Insight {index + 1}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">{insight}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Report Preview</h3>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Preview the generated report before export or print.
-              </p>
-            </div>
-
-            {displayedRows.length === 0 ? (
-              <div className="px-5 py-16 text-center text-sm text-slate-500 dark:text-slate-400">
-                No rows match the current filters for this report.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
-                  <thead className="bg-slate-50 dark:bg-slate-950">
-                    <tr>
-                      {activeReport.columns.map((column) => (
-                        <th
-                          key={column.key}
-                          className="px-5 py-4 text-left font-medium text-slate-500"
-                        >
-                          {column.label}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                    {displayedRows.map((row, rowIndex) => (
-                      <tr key={`${selectedReport}-${rowIndex}`} className="align-top">
-                        {activeReport.columns.map((column) => (
-                          <td
-                            key={column.key}
-                            className="px-5 py-4 text-slate-700 dark:text-slate-200"
-                          >
-                            {String(row[column.key] ?? "-")}
-                          </td>
-                        ))}
-                      </tr>
+      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-950">
+              <tr>
+                {activeReport.columns.map((column) => (
+                  <th key={column.key} className="px-5 py-4 text-left font-medium text-slate-500">
+                    {column.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {paginatedRows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={activeReport.columns.length}
+                    className="px-5 py-12 text-center text-slate-500 dark:text-slate-400"
+                  >
+                    No rows match the current filters.
+                  </td>
+                </tr>
+              ) : (
+                paginatedRows.map((row, rowIndex) => (
+                  <tr key={`${selectedReport}-${rowIndex}`}>
+                    {activeReport.columns.map((column) => (
+                      <td key={column.key} className="px-5 py-4 text-slate-700 dark:text-slate-200">
+                        {String(row[column.key] ?? "-")}
+                      </td>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -692,11 +549,113 @@ export default function ReportsPage() {
   );
 }
 
-function HeroStat({ label, value }: { label: string; value: string | number }) {
+function ReportChart({ type, data }: { type: ChartType; data: ChartDatum[] }) {
+  if (!data.length) {
+    return <div className="py-12 text-center text-sm text-slate-500 dark:text-slate-400">No chart data available.</div>;
+  }
+
+  if (type === "bar") {
+    const max = Math.max(...data.map((item) => item.value), 1);
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div key={item.label} className="grid gap-2 sm:grid-cols-[180px_minmax(0,1fr)_60px] sm:items-center">
+            <span className="truncate text-sm text-slate-600 dark:text-slate-300">{item.label}</span>
+            <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${(item.value / max) * 100}%`, backgroundColor: item.color }}
+              />
+            </div>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === "line") {
+    const width = 640;
+    const height = 220;
+    const padding = 24;
+    const max = Math.max(...data.map((item) => item.value), 1);
+    const points = data
+      .map((item, index) => {
+        const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
+        const y = height - padding - (item.value / max) * (height - padding * 2);
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+    return (
+      <div className="space-y-4">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-64 w-full">
+          <polyline fill="none" stroke="#2563eb" strokeWidth="3" points={points} />
+          {data.map((item, index) => {
+            const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
+            const y = height - padding - (item.value / max) * (height - padding * 2);
+            return <circle key={item.label} cx={x} cy={y} r="5" fill={item.color} />;
+          })}
+        </svg>
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {data.map((item) => (
+            <div key={item.label} className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950">
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{item.label}</p>
+              <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
+  let cumulative = 0;
+  const slices = data.map((item) => {
+    const startAngle = (cumulative / total) * Math.PI * 2;
+    cumulative += item.value;
+    const endAngle = (cumulative / total) * Math.PI * 2;
+    return { ...item, startAngle, endAngle };
+  });
+
   return (
-    <div className="rounded-[1.5rem] border border-white/15 bg-white/10 px-4 py-4 backdrop-blur">
-      <p className="text-xs uppercase tracking-[0.2em] text-white/70">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+    <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-center">
+      <svg viewBox="0 0 220 220" className="mx-auto h-64 w-64">
+        {slices.map((slice) => (
+          <path
+            key={slice.label}
+            d={describeArc(110, 110, 78, slice.startAngle, slice.endAngle)}
+            fill="none"
+            stroke={slice.color}
+            strokeWidth="40"
+          />
+        ))}
+      </svg>
+      <div className="space-y-3">
+        {data.map((item) => (
+          <div key={item.label} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950">
+            <div className="flex items-center gap-3">
+              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="text-sm text-slate-700 dark:text-slate-200">{item.label}</span>
+            </div>
+            <span className="text-sm font-semibold text-slate-800 dark:text-white">{item.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
+}
+
+function polarToCartesian(centerX: number, centerY: number, radius: number, angleInRadians: number) {
+  return {
+    x: centerX + radius * Math.cos(angleInRadians - Math.PI / 2),
+    y: centerY + radius * Math.sin(angleInRadians - Math.PI / 2),
+  };
+}
+
+function describeArc(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(centerX, centerY, radius, endAngle);
+  const end = polarToCartesian(centerX, centerY, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1";
+  return ["M", start.x, start.y, "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(" ");
 }
