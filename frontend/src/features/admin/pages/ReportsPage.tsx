@@ -417,7 +417,7 @@ export default function ReportsPage() {
 
   return (
     <section className="reports-shell space-y-6">
-      <div className="reports-card rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
+      <div className="reports-card reports-print-hide rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{activeReport.title}</h1>
           <div className="flex flex-wrap gap-3">
@@ -478,14 +478,14 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="reports-card reports-chart rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
+      <div className="reports-card reports-chart reports-print-hide rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Analytics</h2>
         </div>
         <ReportChart type={activeReport.chartType} data={chartData} />
       </div>
 
-      <div className="reports-card overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/94 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/94">
+      <div className="reports-card reports-print-table overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/94 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/94">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <thead className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
@@ -526,7 +526,7 @@ export default function ReportsPage() {
           </table>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+        <div className="reports-print-hide flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Page {currentPage} of {totalPages}
           </p>
