@@ -22,12 +22,7 @@ export interface SidebarNavItem {
 export const navItemAdmin: SidebarNavItem[] = [
   { label: "Dashboard", to: "/admin/dashboard", icon: FiHome },
   { label: "Projects", to: "/admin/projects", icon: FiClipboard },
-  { label: "Guide Activity", to: "/admin/guide-activity", icon: FiActivity },
-  { label: "Student Activity", to: "/admin/student-activity", icon: FiBarChart2 },
-  { label: "Guides", to: "/admin-guides", icon: FiUser },
-  { label: "Students", to: "/admin/students", icon: FiUsers },
-  { label: "Track Project", to: "/projects/track", icon: FiSearch },
-    {
+  {
     label: "Reports",
     to: "/admin/reports",
     icon: FiLayers,
@@ -39,6 +34,11 @@ export const navItemAdmin: SidebarNavItem[] = [
       { label: "Department-wise", to: "/admin/reports/department-wise", icon: FiChevronRight },
     ],
   },
+  { label: "Guide Activity", to: "/admin/guide-activity", icon: FiActivity },
+  { label: "Student Activity", to: "/admin/student-activity", icon: FiBarChart2 },
+  { label: "Guides", to: "/admin-guides", icon: FiUser },
+  { label: "Students", to: "/admin/students", icon: FiUsers },
+  { label: "Track Project", to: "/projects/track", icon: FiSearch },
   // { label: "Notifications", to: "/notifications", icon: FiBell },
 ];
 
