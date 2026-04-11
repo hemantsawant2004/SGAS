@@ -15,6 +15,7 @@ import {
 export const navItemAdmin = [
   { label: "Dashboard", to: "/admin/dashboard", icon: FiHome },
   { label: "Projects", to: "/admin/projects", icon: FiClipboard },
+  { label: "Reports", to: "/admin/reports", icon: FiLayers },
   { label: "Guide Activity", to: "/admin/guide-activity", icon: FiActivity },
   { label: "Student Activity", to: "/admin/student-activity", icon: FiBarChart2 },
   { label: "Guides", to: "/admin-guides", icon: FiUser },

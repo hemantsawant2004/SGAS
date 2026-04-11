@@ -17,6 +17,7 @@ import StudentsPage from '../../features/admin/students/pages/StudentsPage';
 import AdminProjectActivityPage from '../../features/admin/pages/AdminProjectActivityPage';
 import AdminGuideActivityPage from '../../features/admin/pages/AdminGuideActivityPage';
 import AdminStudentActivityPage from '../../features/admin/pages/AdminStudentActivityPage';
+import ReportsPage from '../../features/admin/pages/ReportsPage';
 import StudentGuidesPage from '../../features/student/pages/StudentGuidesPage';
 import StudentProjectSubmissionCelebrationPage from '../../features/student/StudentProjectSubmissionCelebrationPage';
 import StudentProjectsPage from '../../features/student/pages/StudentProjectsPage';
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/dashboard", element: <DashboardResolver /> },
           { path: "/admin/projects", element: <AdminProjectActivityPage /> },
+          { path: "/admin/reports", element: <ReportsPage /> },
           { path: "/admin/guide-activity", element: <AdminGuideActivityPage /> },
           { path: "/admin/student-activity", element: <AdminStudentActivityPage /> },
           { path: "/admin-guides", element: <GuidesPage /> },
