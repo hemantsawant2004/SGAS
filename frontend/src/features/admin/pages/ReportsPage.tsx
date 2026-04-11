@@ -62,7 +62,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     id: "guide-workload",
     title: "Guide Workload Report",
-    chartType: "line",
+    chartType: "pie",
     columns: [
       { key: "fullName", label: "Guide" },
       { key: "departmentName", label: "Department" },
