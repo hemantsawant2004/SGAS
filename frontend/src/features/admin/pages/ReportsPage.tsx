@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import { FiDownload, FiFilter, FiPrinter, FiSearch } from "react-icons/fi";
 import { Navigate, useParams } from "react-router-dom";
 import { useAdminOverview } from "../hooks/useAdminOverview";
@@ -415,8 +416,8 @@ export default function ReportsPage() {
   }
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <section className="reports-shell space-y-6">
+      <div className="reports-card rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{activeReport.title}</h1>
           <div className="flex flex-wrap gap-3">
@@ -429,7 +430,7 @@ export default function ReportsPage() {
                   filteredRows
                 )
               }
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               <FiDownload />
               Export CSV
@@ -437,7 +438,7 @@ export default function ReportsPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               <FiPrinter />
               Print
@@ -445,14 +446,14 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px_160px]">
+        <div className="reports-filters mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px_160px]">
           <label className="relative block">
             <FiSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search"
-              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-2xl border border-slate-200 bg-white/90 py-3 pl-11 pr-4 text-sm outline-none transition focus:-translate-y-0.5 focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950/85"
             />
           </label>
 
@@ -461,7 +462,7 @@ export default function ReportsPage() {
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full appearance-none rounded-2xl border border-slate-200 bg-white/90 py-3 pl-11 pr-4 text-sm outline-none transition focus:-translate-y-0.5 focus:border-amber-400 dark:border-slate-700 dark:bg-slate-950/85"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -471,23 +472,23 @@ export default function ReportsPage() {
             </select>
           </label>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+          <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white px-4 py-3 text-sm text-slate-600 shadow-sm dark:border-slate-700 dark:from-slate-950 dark:to-slate-900 dark:text-slate-300">
             {filteredRows.length} rows
           </div>
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="reports-card reports-chart rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Analytics</h2>
         </div>
         <ReportChart type={activeReport.chartType} data={chartData} />
       </div>
 
-      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="reports-card overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/94 shadow-[0_22px_70px_-32px_rgba(15,23,42,0.32)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/94">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <thead className="bg-slate-50 dark:bg-slate-950">
+            <thead className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
               <tr>
                 {activeReport.columns.map((column) => (
                   <th key={column.key} className="px-5 py-4 text-left font-medium text-slate-500">
@@ -508,7 +509,11 @@ export default function ReportsPage() {
                 </tr>
               ) : (
                 paginatedRows.map((row, rowIndex) => (
-                  <tr key={`${selectedReport}-${rowIndex}`}>
+                  <tr
+                    key={`${selectedReport}-${rowIndex}`}
+                    className="reports-row transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                    style={{ animationDelay: `${rowIndex * 55}ms` } as CSSProperties}
+                  >
                     {activeReport.columns.map((column) => (
                       <td key={column.key} className="px-5 py-4 text-slate-700 dark:text-slate-200">
                         {String(row[column.key] ?? "-")}
@@ -530,7 +535,7 @@ export default function ReportsPage() {
               type="button"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950/75 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Previous
             </button>
@@ -538,7 +543,7 @@ export default function ReportsPage() {
               type="button"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950/75 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Next
             </button>
@@ -558,13 +563,17 @@ function ReportChart({ type, data }: { type: ChartType; data: ChartDatum[] }) {
     const max = Math.max(...data.map((item) => item.value), 1);
     return (
       <div className="space-y-4">
-        {data.map((item) => (
+        {data.map((item, index) => (
           <div key={item.label} className="grid gap-2 sm:grid-cols-[180px_minmax(0,1fr)_60px] sm:items-center">
             <span className="truncate text-sm text-slate-600 dark:text-slate-300">{item.label}</span>
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div className="reports-bar-track h-3 rounded-full bg-slate-100 dark:bg-slate-800">
               <div
-                className="h-full rounded-full"
-                style={{ width: `${(item.value / max) * 100}%`, backgroundColor: item.color }}
+                className="reports-bar-fill h-full rounded-full shadow-[0_10px_24px_-12px_rgba(15,23,42,0.55)]"
+                style={{
+                  width: `${(item.value / max) * 100}%`,
+                  backgroundColor: item.color,
+                  animationDelay: `${index * 90}ms`,
+                } as CSSProperties}
               />
             </div>
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.value}</span>
@@ -589,12 +598,36 @@ function ReportChart({ type, data }: { type: ChartType; data: ChartDatum[] }) {
 
     return (
       <div className="space-y-4">
-        <svg viewBox={`0 0 ${width} ${height}`} className="h-64 w-full">
-          <polyline fill="none" stroke="#2563eb" strokeWidth="3" points={points} />
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-64 w-full overflow-visible">
+          <defs>
+            <linearGradient id="reportsLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#0f766e" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+          <polyline
+            className="reports-line"
+            fill="none"
+            stroke="url(#reportsLineGradient)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={points}
+          />
           {data.map((item, index) => {
             const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
             const y = height - padding - (item.value / max) * (height - padding * 2);
-            return <circle key={item.label} cx={x} cy={y} r="5" fill={item.color} />;
+            return (
+              <circle
+                key={item.label}
+                className="reports-line-dot"
+                cx={x}
+                cy={y}
+                r="5"
+                fill={item.color}
+                style={{ animationDelay: `${index * 120 + 450}ms` } as CSSProperties}
+              />
+            );
           })}
         </svg>
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
@@ -621,13 +654,16 @@ function ReportChart({ type, data }: { type: ChartType; data: ChartDatum[] }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-center">
       <svg viewBox="0 0 220 220" className="mx-auto h-64 w-64">
-        {slices.map((slice) => (
+        {slices.map((slice, index) => (
           <path
             key={slice.label}
+            className="reports-pie-slice"
             d={describeArc(110, 110, 78, slice.startAngle, slice.endAngle)}
             fill="none"
             stroke={slice.color}
             strokeWidth="40"
+            strokeLinecap="round"
+            style={{ animationDelay: `${index * 130}ms` } as CSSProperties}
           />
         ))}
       </svg>
