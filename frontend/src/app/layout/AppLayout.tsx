@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import Header from "./Header";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
@@ -11,6 +12,7 @@ export default function AppLayout() {
 
   const user = useAppSelector((s) => s.auth.user);
 
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -61,14 +63,22 @@ export default function AppLayout() {
 
         />
         {/* Content area */}
-        <main className="flex-1">
+        <main className="flex-1 overflow-x-hidden">
           <div className="flex h-full flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-            {/* main card grows with screen width */}
-            <div className="flex-1 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="p-4 sm:p-6 lg:p-7">
-                <Outlet />
-              </div>
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="flex-1 rounded-3xl border border-slate-200/50 bg-white/70 shadow-premium backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/70"
+              >
+                <div className="h-full p-4 sm:p-6 lg:p-7">
+                  <Outlet />
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Footer */}
             <Footer />
