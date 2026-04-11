@@ -8,30 +8,39 @@ import { fetchMe } from "../../../features/auth/services/authService";
 export default function AuthBootstrap({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
   const status = useAppSelector((s) => s.auth.status);
+  useEffect(() => {
+    if (status !== "idle") return;
 
+    let isActive = true;
 
-useEffect(() => {
-  if (status !== "idle") return;
+    const run = async () => {
+      dispatch(setAuthChecking());
+      try {
+        const user = await fetchMe();
 
-  const run = async () => {
-    dispatch(setAuthChecking());
-    try {
-      const user = await fetchMe();
-      dispatch(setAuthenticated({ user }));
-    } catch {
-      dispatch(setUnauthenticated());
-    }
-  };
+        if (!isActive) return;
+        dispatch(setAuthenticated({ user }));
+      } catch {
+        if (!isActive) return;
+        dispatch(setUnauthenticated());
+      }
+    };
 
-  run();
-}, [status, dispatch]);
+    run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [status, dispatch]);
 
   
   if (status === "idle" || status === "checking") {
-    // you can show a full-screen loader/spinner here
     return (
       <div className="min-h-screen grid place-items-center">
-        <p className="text-sm text-gray-500">Loading...</p>
+        <div className="space-y-2 text-center">
+          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-xs text-gray-400">Checking your session</p>
+        </div>
       </div>
     );
   }

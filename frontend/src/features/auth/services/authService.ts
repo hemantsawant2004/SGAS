@@ -7,12 +7,10 @@ import {
 } from "../dto/auth.dto";
 
 export async function fetchMe() {
-  console.log("inside fetch me...")
-  const { data } = await api.get("/auth/me");
+  const { data } = await api.get("/auth/me", { timeout: 12000 });
   return data;
 }
 export async function loginApi(payload: LoginRequestType) {
-  console.log("inside login request",payload)
   const { data } = await api.post('/auth/login', payload);
 
   return AuthSessionResponse.parse({
