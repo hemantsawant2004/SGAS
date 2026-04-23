@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDeleteStudent, useStudents, useUpdateStudent } from "../hooks/useStudents";
 import { FaTrashAlt } from "react-icons/fa";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 5;
 
 export default function StudentsPage() {
   const { data: students = [], isLoading, isError } = useStudents();
