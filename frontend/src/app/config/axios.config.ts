@@ -17,6 +17,12 @@ const resolveApiBaseUrl = () => {
     }
   }
 
+  if (import.meta.env.PROD) {
+    console.warn(
+      "[api] VITE_API_URL is not set in production. Falling back to '/api', which only works if the backend is served from the same domain."
+    );
+  }
+
   return "/api";
 };
 
